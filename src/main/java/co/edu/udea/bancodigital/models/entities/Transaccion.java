@@ -1,0 +1,64 @@
+package co.edu.udea.bancodigital.models.entities;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.UUID;
+
+import co.edu.udea.bancodigital.models.enums.TipoTransaccion;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+/**
+ * Entidad Transaccion del banco digital.
+ * Representa las transacciones bancarias entre cuentas.
+ */
+@Entity
+@Table(name = "transacciones")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Transaccion extends AuditableEntity {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	@Column(name = "id_transaccion")
+	private UUID idTransaccion;
+
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "id_cuenta_origen", nullable = false, foreignKey = @ForeignKey(name = "fk_transaccion_cuenta_origen"))
+	private Cuenta cuentaOrigen;
+
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "id_cuenta_destino", nullable = false, foreignKey = @ForeignKey(name = "fk_transaccion_cuenta_destino"))
+	private Cuenta cuentaDestino;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private TipoTransaccion tipo;
+
+	@Column(nullable = false, precision = 18, scale = 2)
+	private BigDecimal monto;
+
+	@Column(nullable = false)
+	private LocalDate fecha;
+
+	@Column(nullable = false)
+	private LocalTime hora;
+}
