@@ -32,30 +32,27 @@ build/
 ### VS Code ###
 .vscode/
 
-# Variables de entorno
+### Credenciales y entorno ###
 .env
 *.env
 application-local.properties
-
-# Spring Boot
 application-secrets.properties
+src/main/resources/application.properties
 
-# Mac
+### Spring Boot - solo se sube la plantilla ###
+!src/main/resources/application-template.properties
+
+### Mac ###
 .DS_Store
+Thumbs.db
 
-# Compiled class file
+### Compiled ###
 *.class
-
-# Log file
 *.log
-
-# BlueJ files
 *.ctxt
-
-# Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files #
+### Packages ###
 *.jar
 *.war
 *.nar
@@ -64,6 +61,6 @@ application-secrets.properties
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+### JVM crash logs ###
 hs_err_pid*
 replay_pid*
