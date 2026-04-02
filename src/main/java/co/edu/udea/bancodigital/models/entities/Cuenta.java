@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 import co.edu.udea.bancodigital.models.enums.EstadoCuenta;
-import co.edu.udea.bancodigital.models.enums.TipoDocumento;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -44,17 +43,10 @@ public class Cuenta extends AuditableEntity {
 	@Column(name = "id_cuenta")
 	private UUID idCuenta;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private TipoDocumento tipoDocDueno;
-
-	@Column(nullable = false)
-	private String numeroDocDueno;
-
 	@ManyToOne(optional = false)
 	@JoinColumns(value = {
-			@JoinColumn(name = "tipo_doc_dueno", referencedColumnName = "tipo_documento", insertable = false, updatable = false),
-			@JoinColumn(name = "num_doc_dueno", referencedColumnName = "numero_documento", insertable = false, updatable = false)
+			@JoinColumn(name = "tipo_doc_dueno"),
+			@JoinColumn(name = "num_doc_dueno")
 	}, foreignKey = @ForeignKey(name = "fk_cuenta_usuario"))
 	private Usuario dueno;
 

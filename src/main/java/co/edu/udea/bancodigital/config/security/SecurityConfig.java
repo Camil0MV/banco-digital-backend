@@ -3,8 +3,10 @@ package co.edu.udea.bancodigital.config.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -49,6 +51,14 @@ public class SecurityConfig {
 	}
 
 	/**
+	 * Bean para el AuthenticationManager.
+	 */
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+		return config.getAuthenticationManager();
+	}
+
+	/**
 	 * Bean para el filtro JWT.
 	 */
 	@Bean
@@ -74,6 +84,8 @@ public class SecurityConfig {
 						// Rutas públicas - no requieren autenticación
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/usuarios/registro").permitAll()
+						// Swagger UI
+						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
 						// Rutas de administrador - requieren rol ADMINISTRADOR
 						.requestMatchers("/api/v1/admin/**").hasRole("ADMINISTRADOR")
 						// El resto de rutas requieren autenticación
