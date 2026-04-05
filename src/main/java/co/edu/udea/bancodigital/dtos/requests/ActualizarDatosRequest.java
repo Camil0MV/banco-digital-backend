@@ -21,8 +21,7 @@ public class ActualizarDatosRequest {
     @Size(max = 100, message = "El primer apellido no puede superar 100 caracteres")
     private String primerApellido;
 
-    @NotBlank(message = "El segundo apellido es obligatorio")
-    @Pattern(regexp = "^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ ]+$", message = "El segundo apellido solo puede contener letras y espacios")
+    @Pattern(regexp = "^$|^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ ]+$", message = "El segundo apellido solo puede contener letras y espacios")
     @Size(max = 100, message = "El segundo apellido no puede superar 100 caracteres")
     private String segundoApellido;
 

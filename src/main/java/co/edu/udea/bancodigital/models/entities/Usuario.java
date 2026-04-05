@@ -54,7 +54,7 @@ public class Usuario extends AuditableEntity {
 	@Column(name = "primer_apellido", nullable = false, length = 100)
 	private String primerApellido;
 
-	@Column(name = "segundo_apellido", nullable = false, length = 100)
+	@Column(name = "segundo_apellido", nullable = true, length = 100)
 	private String segundoApellido;
 
 	@Column(name = "direccion", nullable = false, length = 200)

@@ -10,6 +10,7 @@ import co.edu.udea.bancodigital.dtos.requests.ActualizarDatosRequest;
 import co.edu.udea.bancodigital.dtos.requests.RegistroRequest;
 import co.edu.udea.bancodigital.dtos.responses.ActualizarDatosResponse;
 import co.edu.udea.bancodigital.dtos.responses.RegistroResponse;
+import co.edu.udea.bancodigital.exception.DuplicateResourceException;
 import co.edu.udea.bancodigital.exception.EntityNotFoundException;
 import co.edu.udea.bancodigital.models.entities.Usuario;
 import co.edu.udea.bancodigital.models.entities.catalogs.Rol;
@@ -30,15 +31,17 @@ public class UsuarioService {
     private final EntityManager entityManager;
 
     public RegistroResponse registrar(RegistroRequest request) {
-        if (usuarioRepository.existsByCorreo(request.getCorreo())) {
-            throw new IllegalArgumentException("Ya existe un usuario con el correo: " + request.getCorreo());
+        String correo = request.getCorreo().trim().toLowerCase();
+        if (usuarioRepository.existsByCorreo(correo)) {
+            throw new DuplicateResourceException("Ya existe un usuario con el correo: " + correo);
         }
 
         Integer idTipoDoc = request.getIdTipoDoc();
-        UsuarioId id = new UsuarioId(idTipoDoc, request.getNumeroDocumento());
+        String numeroDocumento = request.getNumeroDocumento().trim();
+        UsuarioId id = new UsuarioId(idTipoDoc, numeroDocumento);
 
         if (usuarioRepository.existsById(id)) {
-            throw new IllegalArgumentException("Ya existe un usuario con ese documento");
+            throw new DuplicateResourceException("Ya existe un usuario con ese documento");
         }
 
         TipoDocumento tipoDocumento = entityManager.find(TipoDocumento.class, idTipoDoc);
@@ -53,10 +56,10 @@ public class UsuarioService {
                 .tipoDocumento(tipoDocumento)
                 .nombre(request.getNombre())
                 .primerApellido(request.getPrimerApellido())
-                .segundoApellido(request.getSegundoApellido())
+            .segundoApellido(normalizeOptionalText(request.getSegundoApellido()))
                 .direccion(request.getDireccion())
                 .telefono(request.getTelefono())
-                .correo(request.getCorreo())
+                .correo(correo)
                 .contrasena(passwordEncoder.encode(request.getContrasena()))
                 .rol(rolCliente)
                 .build();
@@ -89,12 +92,12 @@ public class UsuarioService {
 
         String nuevoCorreo = request.getCorreo().trim().toLowerCase();
         if (!usuario.getCorreo().equalsIgnoreCase(nuevoCorreo) && usuarioRepository.existsByCorreo(nuevoCorreo)) {
-            throw new IllegalArgumentException("Ya existe un usuario con el correo: " + nuevoCorreo);
+            throw new DuplicateResourceException("Ya existe un usuario con el correo: " + nuevoCorreo);
         }
 
         usuario.setNombre(request.getNombre().trim());
         usuario.setPrimerApellido(request.getPrimerApellido().trim());
-        usuario.setSegundoApellido(request.getSegundoApellido().trim());
+        usuario.setSegundoApellido(normalizeOptionalText(request.getSegundoApellido()));
         usuario.setDireccion(request.getDireccion().trim());
         usuario.setTelefono(request.getTelefono().trim());
         usuario.setCorreo(nuevoCorreo);
@@ -125,6 +128,15 @@ public class UsuarioService {
         int visible = Math.min(4, numeroDocumento.length());
         String tail = numeroDocumento.substring(numeroDocumento.length() - visible);
         return "****" + tail;
+    }
+
+    private String normalizeOptionalText(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     private Rol findRolCliente() {

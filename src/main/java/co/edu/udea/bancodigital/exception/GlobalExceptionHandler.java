@@ -45,6 +45,26 @@ public class GlobalExceptionHandler {
 	}
 
 	/**
+	 * Maneja la excepción DuplicateResourceException.
+	 * Responde con HTTP 409 Conflict.
+	 */
+	@ExceptionHandler(DuplicateResourceException.class)
+	public ResponseEntity<ApiError> handleDuplicateResourceException(DuplicateResourceException ex, WebRequest request) {
+		String traceId = UUID.randomUUID().toString();
+		log.warn("DuplicateResourceException [traceId: {}] - {}", traceId, ex.getMessage(), ex);
+
+		ApiError apiError = ApiError.builder()
+				.errorCode("DUPLICATE_RESOURCE")
+				.message(ex.getMessage())
+				.details("El recurso que intenta registrar o actualizar ya existe")
+				.traceId(traceId)
+				.timestamp(LocalDateTime.now())
+				.build();
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(apiError);
+	}
+
+	/**
 	 * Maneja la excepción IllegalArgumentException.
 	 * Responde con HTTP 400 Bad Request.
 	 */

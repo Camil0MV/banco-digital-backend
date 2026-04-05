@@ -31,8 +31,8 @@ public class RegistroRequest {
     @Pattern(regexp = "^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ ]+$", message = "El primer apellido solo puede contener letras y espacios")
     private String primerApellido;
 
-    @NotBlank(message = "El segundo apellido es obligatorio")
-    @Pattern(regexp = "^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ ]+$", message = "El segundo apellido solo puede contener letras y espacios")
+    @Pattern(regexp = "^$|^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ ]+$", message = "El segundo apellido solo puede contener letras y espacios")
+    @Size(max = 100, message = "El segundo apellido no puede superar 100 caracteres")
     private String segundoApellido;
 
     @NotBlank(message = "La dirección es obligatoria")
@@ -48,6 +48,6 @@ public class RegistroRequest {
 
     @NotBlank(message = "La contraseña es obligatoria")
     @Size(min = 10, max = 12, message = "La contraseña debe tener entre 10 y 12 caracteres")
-    @Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{10,12}$", message = "La contraseña debe incluir al menos 1 mayúscula, 1 número y 1 símbolo")
+    @Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).+$", message = "La contraseña debe incluir al menos 1 mayúscula, 1 número y 1 símbolo")
     private String contrasena;
 }
