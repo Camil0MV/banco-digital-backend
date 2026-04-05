@@ -84,6 +84,8 @@ public class SecurityConfig {
 						// Rutas públicas - no requieren autenticación
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/usuarios/registro").permitAll()
+						// Health checks para Render/Actuator
+						.requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
 						// Swagger UI
 						.requestMatchers("/swagger", "/swagger/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
 						.permitAll()
