@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.stereotype.Repository;
 
 import co.edu.udea.bancodigital.models.entities.Usuario;
-import co.edu.udea.bancodigital.models.entities.UsuarioId;
-import co.edu.udea.bancodigital.models.enums.Rol;
+import co.edu.udea.bancodigital.models.entities.catalogs.Rol;
+import co.edu.udea.bancodigital.models.pks.UsuarioId;
 
 /**
  * Repositorio para la entidad Usuario.
@@ -23,6 +24,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UsuarioId> {
 	 * @param correo el correo a buscar
 	 * @return Optional con el usuario si existe
 	 */
+	@EntityGraph(attributePaths = { "rol", "tipoDocumento" })
 	Optional<Usuario> findByCorreo(String correo);
 
 	/**

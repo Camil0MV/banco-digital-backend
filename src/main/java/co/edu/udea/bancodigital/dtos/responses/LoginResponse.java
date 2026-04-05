@@ -1,6 +1,5 @@
-package co.edu.udea.bancodigital.auth.dto;
+package co.edu.udea.bancodigital.dtos.responses;
 
-import co.edu.udea.bancodigital.models.enums.Rol;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,5 +11,6 @@ public class LoginResponse {
     private String tipo;
     private String nombre;
     private String correo;
-    private Rol rol;
+    private Integer idRol;
+    private String rol;
 }

@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import co.edu.udea.bancodigital.models.enums.EstadoCuenta;
+import co.edu.udea.bancodigital.models.entities.base.AuditableEntity;
+import co.edu.udea.bancodigital.models.entities.catalogs.EstadoCuenta;
+import co.edu.udea.bancodigital.models.entities.catalogs.TipoCuenta;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -45,16 +45,17 @@ public class Cuenta extends AuditableEntity {
 
 	@ManyToOne(optional = false)
 	@JoinColumns(value = {
-			@JoinColumn(name = "tipo_doc_dueno"),
-			@JoinColumn(name = "num_doc_dueno")
+			@JoinColumn(name = "tipo_doc_dueno", referencedColumnName = "id_tipo_doc"),
+			@JoinColumn(name = "num_doc_dueno", referencedColumnName = "numero_documento")
 	}, foreignKey = @ForeignKey(name = "fk_cuenta_usuario"))
 	private Usuario dueno;
 
-	@Column(nullable = false)
-	private String idTipoCuenta;
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "id_tipo_cuenta", nullable = false, foreignKey = @ForeignKey(name = "fk_cuenta_tipo"))
+	private TipoCuenta tipoCuenta;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "id_estado_cuenta", nullable = false)
 	private EstadoCuenta estadoCuenta;
 
 	@Column(nullable = false, precision = 18, scale = 2)

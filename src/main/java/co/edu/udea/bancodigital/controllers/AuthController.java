@@ -1,7 +1,9 @@
-package co.edu.udea.bancodigital.auth;
+package co.edu.udea.bancodigital.controllers;
 
-import co.edu.udea.bancodigital.auth.dto.LoginRequest;
-import co.edu.udea.bancodigital.auth.dto.LoginResponse;
+import co.edu.udea.bancodigital.dtos.requests.LoginRequest;
+import co.edu.udea.bancodigital.dtos.responses.LoginResponse;
+import co.edu.udea.bancodigital.services.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
+    @Operation(summary = "Iniciar sesión y obtener un token JWT")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }

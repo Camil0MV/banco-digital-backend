@@ -1,11 +1,9 @@
-package co.edu.udea.bancodigital.models.entities;
+package co.edu.udea.bancodigital.models.pks;
 
 import java.io.Serializable;
 
-import co.edu.udea.bancodigital.models.enums.TipoDocumento;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -26,8 +24,9 @@ public class UsuarioId implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Enumerated(EnumType.STRING)
-	private TipoDocumento tipoDocumento;
+	@Column(name = "id_tipo_doc", nullable = false)
+	private Integer idTipoDoc;
 
+	@Column(name = "numero_documento", nullable = false, length = 50)
 	private String numeroDocumento;
 }

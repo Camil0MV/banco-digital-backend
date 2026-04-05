@@ -1,15 +1,20 @@
 package co.edu.udea.bancodigital.models.entities;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import co.edu.udea.bancodigital.models.enums.Rol;
+import co.edu.udea.bancodigital.models.entities.base.AuditableEntity;
+import co.edu.udea.bancodigital.models.entities.catalogs.Rol;
+import co.edu.udea.bancodigital.models.entities.catalogs.TipoDocumento;
+import co.edu.udea.bancodigital.models.pks.UsuarioId;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -34,33 +39,35 @@ public class Usuario extends AuditableEntity {
 	@EmbeddedId
 	private UsuarioId id;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@MapsId("idTipoDoc")
+	@JoinColumn(name = "id_tipo_doc", nullable = false, foreignKey = @ForeignKey(name = "fk_usuario_tipo_doc"))
+	private TipoDocumento tipoDocumento;
+
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "id_rol", nullable = false, foreignKey = @ForeignKey(name = "fk_usuario_rol"))
 	private Rol rol;
 
-	@Column(nullable = false)
+	@Column(name = "nombre", nullable = false, length = 100)
 	private String nombre;
 
-	@Column(nullable = false)
+	@Column(name = "primer_apellido", nullable = false, length = 100)
 	private String primerApellido;
 
-	@Column(nullable = false)
+	@Column(name = "segundo_apellido", nullable = false, length = 100)
 	private String segundoApellido;
 
-	@Column(nullable = false)
+	@Column(name = "direccion", nullable = false, length = 200)
 	private String direccion;
 
-	@Column(nullable = false)
+	@Column(name = "telefono", nullable = false, length = 20)
 	private String telefono;
 
-	@Column(nullable = false, unique = true)
+	@Column(name = "correo", nullable = false, unique = true, length = 100)
 	private String correo;
 
-	@Column(nullable = false)
+	@Column(name = "contrasena", nullable = false, length = 255)
 	private String contrasena;
-
-	@Column(nullable = false)
-	private LocalDateTime fechaRegistro;
 
 	@OneToMany(mappedBy = "dueno")
 	@Builder.Default

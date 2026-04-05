@@ -1,7 +1,5 @@
-package co.edu.udea.bancodigital.usuario.dto;
+package co.edu.udea.bancodigital.dtos.responses;
 
-import co.edu.udea.bancodigital.models.enums.Rol;
-import co.edu.udea.bancodigital.models.enums.TipoDocumento;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,11 +7,13 @@ import lombok.Getter;
 @Builder
 public class RegistroResponse {
 
-    private TipoDocumento tipoDocumento;
+    private Integer idTipoDoc;
+    private String tipoDocumento;
     private String numeroDocumento;
     private String nombre;
     private String primerApellido;
     private String segundoApellido;
     private String correo;
-    private Rol rol;
+    private Integer idRol;
+    private String rol;
 }

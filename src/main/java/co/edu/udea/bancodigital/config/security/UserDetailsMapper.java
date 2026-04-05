@@ -1,6 +1,7 @@
 package co.edu.udea.bancodigital.config.security;
 
 import java.util.Collections;
+import java.util.Locale;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -20,11 +21,13 @@ public class UserDetailsMapper {
 	 * @return un UserDetails con la información del usuario
 	 */
 	public static UserDetails mapToUserDetails(Usuario usuario) {
+		String rolNombre = usuario.getRol().getNombre().toUpperCase(Locale.ROOT);
+
 		return User.builder()
 				.username(usuario.getCorreo())
 				.password(usuario.getContrasena())
 				.authorities(Collections
-						.singletonList(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().name())))
+						.singletonList(new SimpleGrantedAuthority("ROLE_" + rolNombre)))
 				.accountExpired(false)
 				.accountLocked(false)
 				.credentialsExpired(false)

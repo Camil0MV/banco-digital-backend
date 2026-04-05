@@ -5,11 +5,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 
-import co.edu.udea.bancodigital.models.enums.TipoTransaccion;
+import co.edu.udea.bancodigital.models.entities.base.AuditableEntity;
+import co.edu.udea.bancodigital.models.entities.catalogs.TipoTransaccion;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -49,8 +48,8 @@ public class Transaccion extends AuditableEntity {
 	@JoinColumn(name = "id_cuenta_destino", nullable = false, foreignKey = @ForeignKey(name = "fk_transaccion_cuenta_destino"))
 	private Cuenta cuentaDestino;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "id_tipo_transaccion", nullable = false, foreignKey = @ForeignKey(name = "fk_transaccion_tipo"))
 	private TipoTransaccion tipo;
 
 	@Column(nullable = false, precision = 18, scale = 2)

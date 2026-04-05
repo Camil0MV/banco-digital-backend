@@ -1,6 +1,7 @@
 package co.edu.udea.bancodigital.config.security;
 
 import java.util.Date;
+import java.util.Locale;
 import java.util.function.Function;
 
 import javax.crypto.SecretKey;
@@ -36,16 +37,14 @@ public class JwtService {
 	 */
 	public String generateToken(Usuario usuario) {
 		log.debug("Generando JWT token para usuario: {}", usuario.getCorreo());
+		String rolNombre = usuario.getRol().getNombre().toUpperCase(Locale.ROOT);
 
 		return Jwts.builder()
 				.subject(usuario.getCorreo())
 				.issuedAt(new Date())
 				.expiration(new Date(System.currentTimeMillis() + jwtExpiration))
 				.signWith(getSigningKey())
-				.claim("correo", usuario.getCorreo())
-				.claim("numeroDocumento", usuario.getId().getNumeroDocumento())
-				.claim("rol", usuario.getRol().name())
-				.claim("nombre", usuario.getNombre())
+				.claim("rol", rolNombre)
 				.compact();
 	}
 
@@ -109,7 +108,7 @@ public class JwtService {
 	 * @return el correo del usuario
 	 */
 	public String extractEmailFromClaim(String token) {
-		return extractClaim(token, claims -> claims.get("correo", String.class));
+		return extractCorreo(token);
 	}
 
 	/**

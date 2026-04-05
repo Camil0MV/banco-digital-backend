@@ -85,7 +85,8 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/usuarios/registro").permitAll()
 						// Swagger UI
-						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+						.requestMatchers("/swagger", "/swagger/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
+						.permitAll()
 						// Rutas de administrador - requieren rol ADMINISTRADOR
 						.requestMatchers("/api/v1/admin/**").hasRole("ADMINISTRADOR")
 						// El resto de rutas requieren autenticación

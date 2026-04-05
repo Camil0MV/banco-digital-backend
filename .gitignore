@@ -35,9 +35,35 @@ build/
 ### Credenciales y entorno ###
 .env
 *.env
+.env.*
+!.env.example
+!.env.template
 application-local.properties
 application-secrets.properties
+application-*.properties
+application-*.yml
+application-*.yaml
 src/main/resources/application.properties
+src/main/resources/application-*.properties
+src/main/resources/application-*.yml
+src/main/resources/application-*.yaml
+
+### Secretos / llaves / certificados ###
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+
+### Bases de datos locales ###
+*.db
+*.sqlite
+*.sqlite3
 
 ### Spring Boot - solo se sube la plantilla ###
 !src/main/resources/application-template.properties

@@ -1,4 +1,4 @@
-package co.edu.udea.bancodigital.auth.dto;
+package co.edu.udea.bancodigital.dtos.requests;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

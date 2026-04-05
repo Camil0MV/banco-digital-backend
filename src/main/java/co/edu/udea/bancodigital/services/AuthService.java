@@ -1,8 +1,8 @@
-package co.edu.udea.bancodigital.auth;
+package co.edu.udea.bancodigital.services;
 
-import co.edu.udea.bancodigital.auth.dto.LoginRequest;
-import co.edu.udea.bancodigital.auth.dto.LoginResponse;
 import co.edu.udea.bancodigital.config.security.JwtService;
+import co.edu.udea.bancodigital.dtos.requests.LoginRequest;
+import co.edu.udea.bancodigital.dtos.responses.LoginResponse;
 import co.edu.udea.bancodigital.exception.EntityNotFoundException;
 import co.edu.udea.bancodigital.repositories.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,8 @@ public class AuthService {
                 .tipo("Bearer")
                 .nombre(usuario.getNombre())
                 .correo(usuario.getCorreo())
-                .rol(usuario.getRol())
+                .idRol(usuario.getRol().getId())
+                .rol(usuario.getRol().getNombre())
                 .build();
     }
 }
