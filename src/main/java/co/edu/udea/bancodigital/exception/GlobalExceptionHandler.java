@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -131,6 +132,27 @@ public class GlobalExceptionHandler {
 				.build();
 
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(apiError);
+	}
+
+	/**
+	 * Maneja errores de parsing JSON (payload malformado).
+	 * Responde con HTTP 400 Bad Request.
+	 */
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	public ResponseEntity<ApiError> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex,
+			WebRequest request) {
+		String traceId = UUID.randomUUID().toString();
+		log.warn("HttpMessageNotReadableException [traceId: {}] - {}", traceId, ex.getMessage(), ex);
+
+		ApiError apiError = ApiError.builder()
+				.errorCode("MALFORMED_JSON")
+				.message("El cuerpo de la solicitud no es un JSON válido")
+				.details("Verifique comas finales, comillas, llaves y tipos de datos en el payload")
+				.traceId(traceId)
+				.timestamp(LocalDateTime.now())
+				.build();
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
 	}
 
 	/**
