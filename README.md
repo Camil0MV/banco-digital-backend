@@ -17,7 +17,7 @@ Este repositorio ya incluye:
 
 ## Stack Tecnico
 
-- Java 21
+- Java 25
 - Spring Boot 4.0.4
 - Spring Web, Spring Data JPA, Spring Security
 - JWT (jjwt)
