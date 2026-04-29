@@ -1,6 +1,8 @@
 package co.edu.udea.bancodigital.services;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import co.edu.udea.bancodigital.dtos.requests.CrearCuentaRequest;
+import co.edu.udea.bancodigital.dtos.responses.ConsultarSaldoResponse;
 import co.edu.udea.bancodigital.dtos.responses.CrearCuentaResponse;
 import co.edu.udea.bancodigital.exception.EntityNotFoundException;
 import co.edu.udea.bancodigital.models.entities.Cuenta;
@@ -66,5 +69,21 @@ public class CuentaService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public ConsultarSaldoResponse consultarSaldoCuenta(UUID idCuenta) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String correo = authentication.getName();
 
+        Usuario usuario = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario autenticado no encontrado"));
+
+        Cuenta cuenta = cuentaRepository.findByIdCuentaAndDueno(idCuenta, usuario)
+                .orElseThrow(() -> new EntityNotFoundException("Cuenta con id " + idCuenta + " no existe o no pertenece al usuario autenticado"));
+
+        return ConsultarSaldoResponse.builder()
+                .idCuenta(cuenta.getIdCuenta())
+                .saldo(cuenta.getSaldo())
+                .consultedAt(LocalDateTime.now())
+                .build();
+    }
 }

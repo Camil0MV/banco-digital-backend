@@ -1,6 +1,7 @@
 package co.edu.udea.bancodigital.repositories;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,6 +24,8 @@ public interface CuentaRepository extends JpaRepository<Cuenta, UUID> {
 	 * @return lista de cuentas del usuario
 	 */
 	List<Cuenta> findAllByDueno(Usuario dueno);
+
+	Optional<Cuenta> findByIdCuentaAndDueno(UUID idCuenta, Usuario dueno);
 
 	/**
 	 * Verifica si un usuario tiene al menos una cuenta.
