@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import co.edu.udea.bancodigital.dtos.requests.CrearCuentaRequest;
+import co.edu.udea.bancodigital.dtos.responses.ConsultarCuentasResponse;
 import co.edu.udea.bancodigital.dtos.responses.ConsultarSaldoResponse;
 import co.edu.udea.bancodigital.dtos.responses.CrearCuentaResponse;
 import co.edu.udea.bancodigital.services.CuentaService;
@@ -31,6 +32,12 @@ public class CuentaController {
     @Operation(summary = "Crear una nueva cuenta bancaria para el usuario autenticado", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<CrearCuentaResponse> crearCuenta(@Valid @RequestBody CrearCuentaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(cuentaService.crearCuenta(request));
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Consultar las cuentas del usuario autenticado", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<ConsultarCuentasResponse> consultarMisCuentas() {
+        return ResponseEntity.ok(cuentaService.consultarMisCuentas());
     }
 
     @GetMapping("/{idCuenta}/saldo")
