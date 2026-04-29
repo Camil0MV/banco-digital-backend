@@ -2,6 +2,8 @@ package co.edu.udea.bancodigital.controllers;
 
 import java.util.UUID;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,9 +19,13 @@ import co.edu.udea.bancodigital.dtos.responses.ConsultarSaldoResponse;
 import co.edu.udea.bancodigital.dtos.responses.CrearCuentaResponse;
 import co.edu.udea.bancodigital.services.CuentaService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/v1/cuentas")
@@ -36,13 +42,26 @@ public class CuentaController {
 
     @GetMapping("/me")
     @Operation(summary = "Consultar las cuentas del usuario autenticado", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<ConsultarCuentasResponse> consultarMisCuentas() {
-        return ResponseEntity.ok(cuentaService.consultarMisCuentas());
+    @ApiResponse(responseCode = "200", description = "Lista de cuentas del usuario autenticado")
+    @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
+    public ResponseEntity<CollectionModel<ConsultarCuentasResponse.DetalleCuenta>> consultarMisCuentas() {
+        ConsultarCuentasResponse response = cuentaService.consultarMisCuentas();
+        CollectionModel<ConsultarCuentasResponse.DetalleCuenta> model = CollectionModel.of(response.getCuentas(),
+                linkTo(methodOn(CuentaController.class).consultarMisCuentas()).withSelfRel());
+        return ResponseEntity.ok(model);
     }
 
     @GetMapping("/{idCuenta}/saldo")
     @Operation(summary = "Consultar el saldo disponible de una cuenta", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<ConsultarSaldoResponse> consultarSaldoCuenta(@PathVariable UUID idCuenta) {
-        return ResponseEntity.ok(cuentaService.consultarSaldoCuenta(idCuenta));
+    @ApiResponse(responseCode = "200", description = "Saldo consultado exitosamente")
+    @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
+    @ApiResponse(responseCode = "403", description = "La cuenta pertenece a otro usuario")
+    @ApiResponse(responseCode = "404", description = "La cuenta no existe")
+    public ResponseEntity<EntityModel<ConsultarSaldoResponse>> consultarSaldoCuenta(@PathVariable UUID idCuenta) {
+        ConsultarSaldoResponse response = cuentaService.consultarSaldoCuenta(idCuenta);
+        EntityModel<ConsultarSaldoResponse> model = EntityModel.of(response,
+                linkTo(methodOn(CuentaController.class).consultarSaldoCuenta(idCuenta)).withSelfRel(),
+                linkTo(methodOn(CuentaController.class).consultarMisCuentas()).withRel("mis-cuentas"));
+        return ResponseEntity.ok(model);
     }
 }
