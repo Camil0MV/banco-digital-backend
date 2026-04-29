@@ -13,5 +13,6 @@ public class ConsultarSaldoResponse {
 
     private UUID idCuenta;
     private BigDecimal saldo;
+    private String estadoCuenta;
     private LocalDateTime consultedAt;
 }
