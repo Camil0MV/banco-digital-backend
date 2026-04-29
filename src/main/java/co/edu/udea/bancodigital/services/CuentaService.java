@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -108,12 +109,21 @@ public class CuentaService {
         Usuario usuario = usuarioRepository.findByCorreo(correo)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario autenticado no encontrado"));
 
-        Cuenta cuenta = cuentaRepository.findByIdCuentaAndDueno(idCuenta, usuario)
-                .orElseThrow(() -> new EntityNotFoundException("Cuenta con id " + idCuenta + " no existe o no pertenece al usuario autenticado"));
+        // Buscar solo por ID primero → 404 si no existe
+        Cuenta cuenta = cuentaRepository.findById(idCuenta)
+            .orElseThrow(() -> new EntityNotFoundException(
+                "Cuenta con id " + idCuenta + " no existe"));
 
+        // Verificar propiedad → 403 si no es el dueño
+        if (!cuenta.getDueno().equals(usuario)) {
+            throw new AccessDeniedException(
+                "No tiene permisos para acceder a esta cuenta");
+        }
+        
         return ConsultarSaldoResponse.builder()
                 .idCuenta(cuenta.getIdCuenta())
                 .saldo(cuenta.getSaldo())
+                .estadoCuenta(cuenta.getEstadoCuenta().getNombre())
                 .consultedAt(LocalDateTime.now())
                 .build();
     }
