@@ -1,6 +1,7 @@
 package co.edu.udea.bancodigital.services;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import co.edu.udea.bancodigital.dtos.requests.CrearCuentaRequest;
+import co.edu.udea.bancodigital.dtos.responses.ConsultarCuentasResponse;
+import co.edu.udea.bancodigital.dtos.responses.ConsultarCuentasResponse.DetalleCuenta;
 import co.edu.udea.bancodigital.dtos.responses.CrearCuentaResponse;
 import co.edu.udea.bancodigital.exception.EntityNotFoundException;
 import co.edu.udea.bancodigital.models.entities.Cuenta;
@@ -66,5 +69,31 @@ public class CuentaService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public ConsultarCuentasResponse consultarMisCuentas() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String correo = authentication.getName();
 
+        Usuario usuario = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario autenticado no encontrado"));
+
+        List<Cuenta> cuentas = cuentaRepository.findAllByDueno(usuario);
+
+        List<DetalleCuenta> detalles = cuentas.stream()
+                .map(c -> DetalleCuenta.builder()
+                        .idCuenta(c.getIdCuenta())
+                        .idTipoCuenta(c.getTipoCuenta().getId())
+                        .tipoCuenta(c.getTipoCuenta().getNombre())
+                        .idEstadoCuenta(c.getEstadoCuenta().getId())
+                        .estadoCuenta(c.getEstadoCuenta().getNombre())
+                        .saldo(c.getSaldo())
+                        .createdAt(c.getCreatedAt())
+                        .build())
+                .toList();
+
+        return ConsultarCuentasResponse.builder()
+                .totalCuentas(cuentas.size())
+                .cuentas(detalles)
+                .build();
+    }
 }
