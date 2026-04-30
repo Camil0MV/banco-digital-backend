@@ -79,10 +79,12 @@ class CuentaServiceTest {
 
     @Test
     void consultarSaldoCuenta_deberiaRetornarSaldoCuandoCuentaPerteneceAlUsuario() {
+        when(estadoCuenta.getNombre()).thenReturn("ACTIVA");
         Usuario usuario = Usuario.builder().correo("user@example.com").build();
         Cuenta cuenta = Cuenta.builder()
                 .idCuenta(UUID.randomUUID())
                 .dueno(usuario)
+            .estadoCuenta(estadoCuenta)
                 .saldo(new BigDecimal("1234.56"))
                 .build();
 
