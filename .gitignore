@@ -40,9 +40,6 @@ build/
 !.env.template
 application-local.properties
 application-secrets.properties
-application-*.properties
-application-*.yml
-application-*.yaml
 src/main/resources/application.properties
 src/main/resources/application-*.properties
 src/main/resources/application-*.yml
