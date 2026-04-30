@@ -1,5 +1,8 @@
 package co.edu.udea.bancodigital.controllers;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.util.UUID;
 
 import org.springframework.hateoas.CollectionModel;
@@ -24,9 +27,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 @RestController
 @RequestMapping("/api/v1/cuentas")
 @RequiredArgsConstructor
@@ -36,6 +36,11 @@ public class CuentaController {
 
     @PostMapping
     @Operation(summary = "Crear una nueva cuenta bancaria para el usuario autenticado", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "201", description = "Cuenta creada exitosamente")
+    @ApiResponse(responseCode = "400", description = "Datos de la cuenta inválidos")
+    @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
+    @ApiResponse(responseCode = "404", description = "Tipo de cuenta no encontrado")
+    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     public ResponseEntity<CrearCuentaResponse> crearCuenta(@Valid @RequestBody CrearCuentaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(cuentaService.crearCuenta(request));
     }
@@ -44,6 +49,7 @@ public class CuentaController {
     @Operation(summary = "Consultar las cuentas del usuario autenticado", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "Lista de cuentas del usuario autenticado")
     @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
+    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     public ResponseEntity<CollectionModel<ConsultarCuentasResponse.DetalleCuenta>> consultarMisCuentas() {
         ConsultarCuentasResponse response = cuentaService.consultarMisCuentas();
         CollectionModel<ConsultarCuentasResponse.DetalleCuenta> model = CollectionModel.of(response.getCuentas(),
@@ -57,6 +63,7 @@ public class CuentaController {
     @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
     @ApiResponse(responseCode = "403", description = "La cuenta pertenece a otro usuario")
     @ApiResponse(responseCode = "404", description = "La cuenta no existe")
+    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     public ResponseEntity<EntityModel<ConsultarSaldoResponse>> consultarSaldoCuenta(@PathVariable UUID idCuenta) {
         ConsultarSaldoResponse response = cuentaService.consultarSaldoCuenta(idCuenta);
         EntityModel<ConsultarSaldoResponse> model = EntityModel.of(response,
