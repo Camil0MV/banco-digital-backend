@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class ListarClientesResponse {
+public class ListarClientesAdminResponse {
 	private final Integer idTipoDocumento;
 	private final String tipoDocumento;
 	private final String numeroDocumento;

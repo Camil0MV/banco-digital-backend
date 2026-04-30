@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import co.edu.udea.bancodigital.dtos.responses.ListarClientesResponse;
+import co.edu.udea.bancodigital.dtos.responses.ListarClientesAdminResponse;
 import co.edu.udea.bancodigital.models.entities.Usuario;
 import co.edu.udea.bancodigital.models.entities.catalogs.Rol;
 import co.edu.udea.bancodigital.models.entities.catalogs.TipoDocumento;
@@ -64,12 +64,12 @@ class AdminServiceTest {
         when(usuarioRepository.findAllByRol_NombreIgnoreCase("CLIENTE"))
                 .thenReturn(List.of(usuario));
 
-        List<ListarClientesResponse> response = usuarioService.listarClientes();
+        List<ListarClientesAdminResponse> response = usuarioService.listarClientes();
 
         assertNotNull(response);
         assertEquals(1, response.size());
 
-        ListarClientesResponse item = response.get(0);
+        ListarClientesAdminResponse item = response.get(0);
         assertEquals(1, item.getIdTipoDocumento());
         assertEquals("CC", item.getTipoDocumento());
         assertEquals("123456", item.getNumeroDocumento());
@@ -88,7 +88,7 @@ class AdminServiceTest {
         when(usuarioRepository.findAllByRol_NombreIgnoreCase("CLIENTE"))
                 .thenReturn(List.of());
 
-        List<ListarClientesResponse> response = usuarioService.listarClientes();
+        List<ListarClientesAdminResponse> response = usuarioService.listarClientes();
 
         assertNotNull(response);
         assertTrue(response.isEmpty());
