@@ -1,14 +1,18 @@
 package co.edu.udea.bancodigital.services;
 
+import java.util.List;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import co.edu.udea.bancodigital.dtos.requests.ActualizarDatosRequest;
 import co.edu.udea.bancodigital.dtos.requests.RegistroRequest;
 import co.edu.udea.bancodigital.dtos.responses.ActualizarDatosResponse;
+import co.edu.udea.bancodigital.dtos.responses.ListarClientesResponse;
 import co.edu.udea.bancodigital.dtos.responses.RegistroResponse;
 import co.edu.udea.bancodigital.exception.DuplicateResourceException;
 import co.edu.udea.bancodigital.exception.EntityNotFoundException;
@@ -118,6 +122,25 @@ public class UsuarioService {
                 .rol(actualizado.getRol().getNombre())
                 .updatedAt(actualizado.getUpdatedAt())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ListarClientesResponse> listarClientes() {
+    return usuarioRepository.findAllByRol_NombreIgnoreCase(ROL_CLIENTE).stream()
+        .map(usuario -> ListarClientesResponse.builder()
+            .idTipoDocumento(usuario.getTipoDocumento().getId())
+            .tipoDocumento(usuario.getTipoDocumento().getNombre())
+            .numeroDocumento(usuario.getId().getNumeroDocumento())
+            .nombre(usuario.getNombre())
+            .primerApellido(usuario.getPrimerApellido())
+            .segundoApellido(usuario.getSegundoApellido())
+            .correo(usuario.getCorreo())
+            .telefono(usuario.getTelefono())
+            .direccion(usuario.getDireccion())
+            .rol(usuario.getRol().getNombre())
+            .createdAt(usuario.getCreatedAt())
+            .build())
+        .toList();
     }
 
     private String maskNumeroDocumento(String numeroDocumento) {
