@@ -42,4 +42,13 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UsuarioId> {
 	 * @return lista de usuarios con el rol especificado
 	 */
 	List<Usuario> findAllByRol(Rol rol);
+
+	/**
+	 * Obtiene todos los usuarios cuyo rol coincide con el nombre especificado,
+	 * sin distinguir mayusculas o minusculas.
+	 *
+	 * @param nombreRol el nombre del rol a filtrar
+	 * @return lista de usuarios con el nombre de rol especificado
+	 */
+	List<Usuario> findAllByRol_NombreIgnoreCase(String nombreRol);
 }
