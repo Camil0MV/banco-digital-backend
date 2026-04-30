@@ -67,6 +67,8 @@ id_ed25519
 
 ### Spring Boot - solo se sube la plantilla ###
 !src/main/resources/application-template.properties
+!src/test/resources/application-test.properties
+!src/main/resources/application-template.properties
 
 ### Mac ###
 .DS_Store
