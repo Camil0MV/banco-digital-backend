@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import co.edu.udea.bancodigital.dtos.requests.ActualizarDatosRequest;
 import co.edu.udea.bancodigital.dtos.requests.RegistroRequest;
 import co.edu.udea.bancodigital.dtos.responses.ActualizarDatosResponse;
-import co.edu.udea.bancodigital.dtos.responses.ListarClientesResponse;
+import co.edu.udea.bancodigital.dtos.responses.ListarClientesAdminResponse;
 import co.edu.udea.bancodigital.dtos.responses.RegistroResponse;
 import co.edu.udea.bancodigital.exception.DuplicateResourceException;
 import co.edu.udea.bancodigital.exception.EntityNotFoundException;
@@ -125,9 +125,9 @@ public class UsuarioService {
     }
 
     @Transactional(readOnly = true)
-    public List<ListarClientesResponse> listarClientes() {
+    public List<ListarClientesAdminResponse> listarClientes() {
     return usuarioRepository.findAllByRol_NombreIgnoreCase(ROL_CLIENTE).stream()
-        .map(usuario -> ListarClientesResponse.builder()
+        .map(usuario -> ListarClientesAdminResponse.builder()
             .idTipoDocumento(usuario.getTipoDocumento().getId())
             .tipoDocumento(usuario.getTipoDocumento().getNombre())
             .numeroDocumento(usuario.getId().getNumeroDocumento())

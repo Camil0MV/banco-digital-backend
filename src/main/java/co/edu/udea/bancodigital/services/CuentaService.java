@@ -16,6 +16,7 @@ import co.edu.udea.bancodigital.dtos.responses.ConsultarCuentasResponse;
 import co.edu.udea.bancodigital.dtos.responses.ConsultarCuentasResponse.DetalleCuenta;
 import co.edu.udea.bancodigital.dtos.responses.ConsultarSaldoResponse;
 import co.edu.udea.bancodigital.dtos.responses.CrearCuentaResponse;
+import co.edu.udea.bancodigital.dtos.responses.ListarCuentasAdminResponse;
 import co.edu.udea.bancodigital.exception.EntityNotFoundException;
 import co.edu.udea.bancodigital.models.entities.Cuenta;
 import co.edu.udea.bancodigital.models.entities.Usuario;
@@ -126,5 +127,29 @@ public class CuentaService {
                 .estadoCuenta(cuenta.getEstadoCuenta().getNombre())
                 .consultedAt(LocalDateTime.now())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ListarCuentasAdminResponse> listarCuentasAdmin() {
+        return cuentaRepository.findAll().stream()
+                .map(cuenta -> ListarCuentasAdminResponse.builder()
+                        .idCuenta(cuenta.getIdCuenta())
+                        .tipoDocumentoDueno(cuenta.getDueno().getTipoDocumento().getNombre())
+                        .numeroDocumentoDueno(cuenta.getDueno().getId().getNumeroDocumento())
+                        .nombreCompletoDueno(buildNombreCompletoDueno(cuenta.getDueno()))
+                        .tipoCuenta(cuenta.getTipoCuenta().getNombre())
+                        .estadoCuenta(cuenta.getEstadoCuenta().getNombre())
+                        .saldo(cuenta.getSaldo())
+                        .createdAt(cuenta.getCreatedAt())
+                        .build())
+                .toList();
+    }
+    
+    private String buildNombreCompletoDueno(Usuario dueno) {
+        String segundoApellido = dueno.getSegundoApellido();
+                if (segundoApellido == null || segundoApellido.isBlank()) {
+                        return dueno.getNombre() + " " + dueno.getPrimerApellido();
+                }
+                return dueno.getNombre() + " " + dueno.getPrimerApellido() + " " + segundoApellido;
     }
 }
