@@ -35,6 +35,7 @@ public class AdminController {
     @ApiResponse(responseCode = "200", description = "Lista de clientes registrada")
     @ApiResponse(responseCode = "401", description = "Token JWT invalido o expirado")
     @ApiResponse(responseCode = "403", description = "Acceso denegado")
+    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     public ResponseEntity<CollectionModel<ListarClientesAdminResponse>> listarClientes() {
         CollectionModel<ListarClientesAdminResponse> model = CollectionModel.of(
                 usuarioService.listarClientes(),
@@ -48,6 +49,7 @@ public class AdminController {
     @ApiResponse(responseCode = "200", description = "Lista de cuentas registrada")
     @ApiResponse(responseCode = "401", description = "Token JWT invalido o expirado")
     @ApiResponse(responseCode = "403", description = "Acceso denegado")
+    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     public ResponseEntity<CollectionModel<ListarCuentasAdminResponse>> listarCuentas() {
         CollectionModel<ListarCuentasAdminResponse> model = CollectionModel.of(
                 cuentaService.listarCuentasAdmin(),
