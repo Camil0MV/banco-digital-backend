@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI Pipeline - Banco Digital Backend
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
           SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
           DATASOURCE_USERNAME: ${{ secrets.DATASOURCE_USERNAME }}
           DATASOURCE_PASSWORD: ${{ secrets.DATASOURCE_PASSWORD }}
-        run: mvn verify --no-transfer-progress
+        run: mvn verify --no-transfer-progress "-Dspring.profiles.active=test"
 
       - name: Upload test results
         if: always()
