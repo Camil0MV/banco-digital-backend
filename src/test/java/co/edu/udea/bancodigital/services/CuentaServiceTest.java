@@ -141,9 +141,7 @@ class CuentaServiceTest {
             .estadoCuenta(estadoCuenta)
             .build();
 
-        when(usuarioRepository.findByCorreo("user@example.com"))
-            .thenReturn(Optional.of(usuario));
-        when(cuentaRepository.findAllByDuenoCorreo(usuario.getCorreo()))
+        when(cuentaRepository.findAllByDuenoCorreo("user@example.com"))
             .thenReturn(List.of(cuenta));
 
         ConsultarCuentasResponse response = cuentaService.consultarMisCuentas();
@@ -154,9 +152,7 @@ class CuentaServiceTest {
 
     @Test
     void consultarMisCuentas_deberiaRetornarListaVaciaSiNoTieneCuentas() {
-        when(usuarioRepository.findByCorreo("user@example.com"))
-            .thenReturn(Optional.of(usuario));
-        when(cuentaRepository.findAllByDuenoCorreo(usuario.getCorreo()))
+        when(cuentaRepository.findAllByDuenoCorreo("user@example.com"))
             .thenReturn(List.of());
 
         ConsultarCuentasResponse response = cuentaService.consultarMisCuentas();
