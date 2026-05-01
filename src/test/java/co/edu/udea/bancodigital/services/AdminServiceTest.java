@@ -61,8 +61,8 @@ class AdminServiceTest {
         when(usuario.getDireccion()).thenReturn("Calle 123");
         when(usuario.getCreatedAt()).thenReturn(createdAt);
 
-        when(usuarioRepository.findAllByRol_NombreIgnoreCase("CLIENTE"))
-                .thenReturn(List.of(usuario));
+        when(usuarioRepository.findClientesConRol("CLIENTE"))
+            .thenReturn(List.of(usuario));
 
         List<ListarClientesAdminResponse> response = usuarioService.listarClientes();
 
@@ -85,8 +85,8 @@ class AdminServiceTest {
 
     @Test
     void listarClientes_deberiaRetornarListaVacia() {
-        when(usuarioRepository.findAllByRol_NombreIgnoreCase("CLIENTE"))
-                .thenReturn(List.of());
+        when(usuarioRepository.findClientesConRol("CLIENTE"))
+            .thenReturn(List.of());
 
         List<ListarClientesAdminResponse> response = usuarioService.listarClientes();
 

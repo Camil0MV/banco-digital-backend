@@ -89,7 +89,7 @@ class CuentaServiceTest {
                 .build();
 
         when(usuarioRepository.findByCorreo("user@example.com")).thenReturn(Optional.of(usuario));
-        when(cuentaRepository.findById(cuenta.getIdCuenta())).thenReturn(Optional.of(cuenta));
+        when(cuentaRepository.findByIdCuentaConDueno(cuenta.getIdCuenta())).thenReturn(Optional.of(cuenta));
 
         ConsultarSaldoResponse response = cuentaService.consultarSaldoCuenta(cuenta.getIdCuenta());
 
@@ -103,7 +103,7 @@ class CuentaServiceTest {
         Usuario usuario = Usuario.builder().correo("user@example.com").build();
 
         when(usuarioRepository.findByCorreo("user@example.com")).thenReturn(Optional.of(usuario));
-        when(cuentaRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+        when(cuentaRepository.findByIdCuentaConDueno(any(UUID.class))).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> cuentaService.consultarSaldoCuenta(UUID.randomUUID()));
     }
@@ -119,7 +119,7 @@ class CuentaServiceTest {
 
         when(usuarioRepository.findByCorreo("user@example.com"))
             .thenReturn(Optional.of(usuario));
-        when(cuentaRepository.findById(cuenta.getIdCuenta()))
+        when(cuentaRepository.findByIdCuentaConDueno(cuenta.getIdCuenta()))
             .thenReturn(Optional.of(cuenta));
 
         assertThrows(AccessDeniedException.class,
@@ -143,7 +143,7 @@ class CuentaServiceTest {
 
         when(usuarioRepository.findByCorreo("user@example.com"))
             .thenReturn(Optional.of(usuario));
-        when(cuentaRepository.findAllByDueno(usuario))
+        when(cuentaRepository.findAllByDuenoCorreo(usuario.getCorreo()))
             .thenReturn(List.of(cuenta));
 
         ConsultarCuentasResponse response = cuentaService.consultarMisCuentas();
@@ -156,7 +156,7 @@ class CuentaServiceTest {
     void consultarMisCuentas_deberiaRetornarListaVaciaSiNoTieneCuentas() {
         when(usuarioRepository.findByCorreo("user@example.com"))
             .thenReturn(Optional.of(usuario));
-        when(cuentaRepository.findAllByDueno(usuario))
+        when(cuentaRepository.findAllByDuenoCorreo(usuario.getCorreo()))
             .thenReturn(List.of());
 
         ConsultarCuentasResponse response = cuentaService.consultarMisCuentas();
