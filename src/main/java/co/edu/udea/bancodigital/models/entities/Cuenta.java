@@ -59,7 +59,8 @@ public class Cuenta extends AuditableEntity {
 	private EstadoCuenta estadoCuenta;
 
 	@Column(nullable = false, precision = 18, scale = 2)
-	private BigDecimal saldo;
+	@Builder.Default
+	private BigDecimal saldo = BigDecimal.ZERO;
 
 	@OneToMany(mappedBy = "cuentaOrigen")
 	@Builder.Default

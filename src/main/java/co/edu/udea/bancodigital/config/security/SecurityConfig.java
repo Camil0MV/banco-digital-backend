@@ -89,8 +89,8 @@ public class SecurityConfig {
 						// Swagger UI
 						.requestMatchers("/swagger", "/swagger/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
 						.permitAll()
-						// Rutas de administrador - requieren rol ADMINISTRADOR
-						.requestMatchers("/api/v1/admin/**").hasRole("ADMINISTRADOR")
+						// Rutas de administrador - requieren rol ADMIN
+						.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 						// El resto de rutas requieren autenticación
 						.anyRequest().authenticated())
 				// Agrega el filtro JWT antes del filtro de Usuario-Contraseña

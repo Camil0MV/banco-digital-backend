@@ -40,9 +40,6 @@ build/
 !.env.template
 application-local.properties
 application-secrets.properties
-application-*.properties
-application-*.yml
-application-*.yaml
 src/main/resources/application.properties
 src/main/resources/application-*.properties
 src/main/resources/application-*.yml
@@ -65,7 +62,9 @@ id_ed25519
 *.sqlite
 *.sqlite3
 
-### Spring Boot - solo se sube la plantilla ###
+### Solo se sube la plantilla y pruebas ###
+!src/main/resources/application-template.properties
+!src/test/resources/application-test.properties
 !src/main/resources/application-template.properties
 
 ### Mac ###

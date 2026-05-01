@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.stereotype.Repository;
 
@@ -42,4 +44,19 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UsuarioId> {
 	 * @return lista de usuarios con el rol especificado
 	 */
 	List<Usuario> findAllByRol(Rol rol);
+
+	/**
+	 * Obtiene todos los usuarios cuyo rol coincide con el nombre especificado,
+	 * sin distinguir mayusculas o minusculas.
+	 *
+	 * @param nombreRol el nombre del rol a filtrar
+	 * @return lista de usuarios con el nombre de rol especificado
+	 */
+	@Query("""
+	    SELECT u FROM Usuario u
+	    JOIN FETCH u.rol r
+	    JOIN FETCH u.tipoDocumento td
+	    WHERE UPPER(r.nombre) = UPPER(:nombreRol)
+	    """)
+	List<Usuario> findClientesConRol(@Param("nombreRol") String nombreRol);
 }
