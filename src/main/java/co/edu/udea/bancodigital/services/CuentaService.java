@@ -79,10 +79,7 @@ public class CuentaService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String correo = authentication.getName();
 
-        Usuario usuario = usuarioRepository.findByCorreo(correo)
-                .orElseThrow(() -> new EntityNotFoundException("Usuario autenticado no encontrado"));
-
-        List<Cuenta> cuentas = cuentaRepository.findAllByDueno(usuario);
+        List<Cuenta> cuentas = cuentaRepository.findAllByDuenoCorreo(correo);
 
         List<DetalleCuenta> detalles = cuentas.stream()
                 .map(c -> DetalleCuenta.builder()
@@ -111,7 +108,7 @@ public class CuentaService {
                 .orElseThrow(() -> new EntityNotFoundException("Usuario autenticado no encontrado"));
 
         // Buscar solo por ID primero → 404 si no existe
-        Cuenta cuenta = cuentaRepository.findById(idCuenta)
+        Cuenta cuenta = cuentaRepository.findByIdCuentaConDueno(idCuenta)
             .orElseThrow(() -> new EntityNotFoundException(
                 "Cuenta con id " + idCuenta + " no existe"));
 

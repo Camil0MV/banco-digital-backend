@@ -126,7 +126,7 @@ public class UsuarioService {
 
     @Transactional(readOnly = true)
     public List<ListarClientesAdminResponse> listarClientes() {
-    return usuarioRepository.findAllByRol_NombreIgnoreCase(ROL_CLIENTE).stream()
+    return usuarioRepository.findClientesConRol(ROL_CLIENTE).stream()
         .map(usuario -> ListarClientesAdminResponse.builder()
             .idTipoDocumento(usuario.getTipoDocumento().getId())
             .tipoDocumento(usuario.getTipoDocumento().getNombre())
