@@ -6,7 +6,7 @@ on:
       - release/testing-1
 
 jobs:
-
+#Trabajo 1
   tests:
     runs-on: ubuntu-latest
     steps:
@@ -19,7 +19,7 @@ jobs:
 
       - name: Run tests
         run: mvn clean test -Dspring.profiles.active=test
-
+#Trabajo 2
   sonar:
     needs: tests
     runs-on: ubuntu-latest
