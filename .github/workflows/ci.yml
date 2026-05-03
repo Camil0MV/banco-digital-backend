@@ -3,10 +3,10 @@ name: CI Pipeline - Banco Digital Backend
 on:
   push:
     branches:
-      - testing-1
+      - release/testing-1
   pull_request:
     branches:
-      - testing-1
+      - release/testing-1
 
 jobs:
   build-and-test:
@@ -17,7 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # IMPORTANTE para SonarCloud
+          fetch-depth: 0 
 
       - name: Set up Java 21
         uses: actions/setup-java@v4
