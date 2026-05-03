@@ -80,6 +80,9 @@ public class CuentaService {
         String correo = authentication.getName();
 
         List<Cuenta> cuentas = cuentaRepository.findAllByDuenoCorreo(correo);
+        if (cuentas.isEmpty()) {
+            throw new EntityNotFoundException("Cuenta no disponible");
+        }
 
         List<DetalleCuenta> detalles = cuentas.stream()
                 .map(c -> DetalleCuenta.builder()
