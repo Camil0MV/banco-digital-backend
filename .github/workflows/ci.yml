@@ -42,7 +42,7 @@ jobs:
           path: target/surefire-reports/
   sonar:
     name: SonarCloud Analysis
-    needs: Build and Test 
+    needs: build-and-test
     runs-on: ubuntu-latest
 
     steps:
