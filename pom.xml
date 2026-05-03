@@ -197,6 +197,7 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.10</version>
+
                 <executions>
                     <execution>
                         <goals>
@@ -206,12 +207,20 @@
 
                     <execution>
                         <id>report</id>
-                        <phase>verify</phase>
+                        <phase>verify</phase> 
                         <goals>
                             <goal>report</goal>
                         </goals>
                     </execution>
                 </executions>
+
+                <configuration>
+                    <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
+                    <reports>
+                        <xml>true</xml>   
+                        <html>true</html>
+                    </reports>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
