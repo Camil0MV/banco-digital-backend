@@ -9,6 +9,7 @@ on:
       - release/testing-1
 
 jobs:
+
   build-and-test:
     name: Build and Test
     runs-on: ubuntu-latest
@@ -30,7 +31,7 @@ jobs:
           SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
           DATASOURCE_USERNAME: ${{ secrets.DATASOURCE_USERNAME }}
           DATASOURCE_PASSWORD: ${{ secrets.DATASOURCE_PASSWORD }}
-        run: mvn verify --no-transfer-progress "-Dspring.profiles.active=test"
+        run: mvn clean verify --no-transfer-progress "-Dspring.profiles.active=test"
 
       - name: Upload test results
         if: always()
@@ -38,9 +39,17 @@ jobs:
         with:
           name: test-results
           path: target/surefire-reports/
+
+      - name: Upload JaCoCo report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
+
+
   sonar:
     name: SonarCloud Analysis
-    needs: build-and-test   
+    needs: build-and-test
     runs-on: ubuntu-latest
 
     steps:
@@ -63,14 +72,21 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
+      - name: Download JaCoCo report
+        uses: actions/download-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
+
       - name: Analyze with SonarCloud
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
-          mvn -B verify sonar:sonar
+          mvn -B sonar:sonar
           -Dsonar.projectKey=FabricaEscuela2026-EAP13_banco-digital-backend
           -Dsonar.organization=fabricaescuela2026-eap13
           -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.login=$SONAR_TOKEN
+          -Dsonar.sources=src/main/java
+          -Dsonar.tests=src/test/java
           -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-
