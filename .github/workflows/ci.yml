@@ -3,10 +3,10 @@ name: CI Pipeline - Banco Digital Backend
 on:
   push:
     branches:
-      - release/testing-1
+      - main
   pull_request:
     branches:
-      - release/testing-1
+      - main
 
 jobs:
   build-test-sonar:
