@@ -52,11 +52,11 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UsuarioId> {
 	 * @param nombreRol el nombre del rol a filtrar
 	 * @return lista de usuarios con el nombre de rol especificado
 	 */
-	@Query("""
-	    SELECT u FROM Usuario u
-	    JOIN FETCH u.rol r
-	    JOIN FETCH u.tipoDocumento td
-	    WHERE UPPER(r.nombre) = UPPER(:nombreRol)
-	    """)
+@Query("""
+	SELECT u FROM Usuario u
+	JOIN FETCH u.rol r
+	JOIN FETCH u.tipoDocumento td
+	WHERE UPPER(r.nombre) = UPPER(:nombreRol)
+	""")
 	List<Usuario> findClientesConRol(@Param("nombreRol") String nombreRol);
 }

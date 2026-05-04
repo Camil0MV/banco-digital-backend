@@ -54,7 +54,7 @@ public class SecurityConfig {
 	 * Bean para el AuthenticationManager.
 	 */
 	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration config){
 		return config.getAuthenticationManager();
 	}
 
@@ -70,8 +70,14 @@ public class SecurityConfig {
 	 * Configura la cadena de filtros de seguridad.
 	 * Define las rutas públicas, protegidas y de administrador.
 	 */
+
+	
+	/*Elimine throw Exception porque no se produce en ningun momento 
+	en el metodo (pq se deben comprobar directamente en el método si desean implementarlo).
+	En este momento commo esta si llega a fallar devuelve un RunTimeException
+	*/
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain securityFilterChain(HttpSecurity http){
 		http
 				// Deshabilita CSRF (no es necesario para REST API con tokens JWT)
 				.csrf(csrf -> csrf.disable())

@@ -314,6 +314,28 @@ public class AcceptanceSteps {
 
     @Given("que el administrador esta autenticado en el sistema")
     public void adminAutenticado() {
+        Authentication auth = mock(Authentication.class);
+        when(auth.isAuthenticated()).thenReturn(true);
+        when(auth.getName()).thenReturn("admin@example.com");
+        SecurityContextImpl context = new SecurityContextImpl();
+        context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
+        
+        Rol rolAdmin = new Rol();
+        rolAdmin.setId(1);
+        rolAdmin.setNombre("ADMIN");
+        
+        usuario = Usuario.builder()
+                .id(new UsuarioId(1, "1111111111"))
+                .tipoDocumento(tipoDocumento)
+                .rol(rolAdmin)
+                .nombre("Admin")
+                .primerApellido("Sistema")
+                .direccion("Calle Admin")
+                .telefono("3009999999")
+                .correo("admin@example.com")
+                .build();
+        when(usuarioRepository.findByCorreo("admin@example.com")).thenReturn(Optional.of(usuario));
     }
 
     @And("existen clientes registrados")

@@ -25,22 +25,21 @@ public interface CuentaRepository extends JpaRepository<Cuenta, UUID> {
 	 * @param correo el usuario dueño de las cuentas
 	 * @return lista de cuentas del usuario
 	 */
-	@Query("""
-	    SELECT c FROM Cuenta c
-	    JOIN FETCH c.tipoCuenta tc
-	    JOIN FETCH c.estadoCuenta ec
-	    JOIN FETCH c.dueno u
-	    WHERE u.correo = :correo
-	    """)
+@Query("""
+        SELECT c FROM Cuenta c
+        JOIN FETCH c.tipoCuenta tc
+        JOIN FETCH c.estadoCuenta ec
+        JOIN FETCH c.dueno u
+        WHERE u.correo = :correo
+        """)
 	List<Cuenta> findAllByDuenoCorreo(@Param("correo") String correo);
 
-
-	@Query("""
-	    SELECT c FROM Cuenta c
-	    JOIN FETCH c.dueno u
-	    JOIN FETCH c.estadoCuenta ec
-	    WHERE c.idCuenta = :idCuenta
-	    """)
+@Query("""
+        SELECT c FROM Cuenta c
+        JOIN FETCH c.dueno u
+        JOIN FETCH c.estadoCuenta ec
+        WHERE c.idCuenta = :idCuenta
+        """)
 	Optional<Cuenta> findByIdCuentaConDueno(@Param("idCuenta") UUID idCuenta);
 
 	/**

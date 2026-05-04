@@ -204,9 +204,10 @@ class UsuarioServiceTest {
     @DisplayName("CP-UPD-04: actualizacion sin autenticacion rechaza solicitud")
     void actualizarMisDatosSinAutenticacion_deberiaLanzarIllegalArgumentException() {
         SecurityContextHolder.clearContext();
+        ActualizarDatosRequest request = actualizarDatosRequest("Juan", "juan@example.com");
 
         assertThrows(IllegalArgumentException.class,
-                () -> usuarioService.actualizarMisDatos(actualizarDatosRequest("Juan", "juan@example.com")));
+                () -> usuarioService.actualizarMisDatos(request));
     }
 
     @Test

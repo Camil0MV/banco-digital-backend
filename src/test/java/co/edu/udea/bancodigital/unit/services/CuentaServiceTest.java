@@ -27,7 +27,6 @@ import co.edu.udea.bancodigital.repositories.UsuarioRepository;
 import co.edu.udea.bancodigital.services.CuentaService;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -108,11 +107,13 @@ class CuentaServiceTest {
 
     @Test
     @DisplayName("CP- CSD - 03: Usuario sin autenticación")
-    void consultarSaldoCuenta_deberiaLanzarAccessDeniedCuandoNoEncuentraDueno() {
-        when(usuarioRepository.findByCorreo("juan@example.com")).thenReturn(Optional.of(usuario));
-        when(cuentaRepository.findByIdCuentaConDueno(any(UUID.class))).thenReturn(Optional.empty());
+    void consultarSaldoCuenta_deberiaLanzarEntityNotFoundExceptionCuandoNoEncuentraDueno() {
+        UUID idCuenta = UUID.randomUUID();
 
-        assertThrows(EntityNotFoundException.class, () -> cuentaService.consultarSaldoCuenta(UUID.randomUUID()));
+        when(usuarioRepository.findByCorreo("juan@example.com")).thenReturn(Optional.of(usuario));
+        when(cuentaRepository.findByIdCuentaConDueno(idCuenta)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> cuentaService.consultarSaldoCuenta(idCuenta));
     }
 
 

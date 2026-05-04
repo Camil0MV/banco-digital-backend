@@ -9,6 +9,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import co.edu.udea.bancodigital.dtos.requests.ActualizarDatosRequest;
@@ -52,52 +54,23 @@ class RegistroRequestValidationTest {
         assertTieneViolacionEnCampo(validator.validate(request), "correo");
     }
 
-    @Test
-    @DisplayName("CP-REG-07: contrasena de 7 caracteres debe ser invalida")
-    void contrasenaDeSieteCaracteres_deberiaSerInvalida() {
-        RegistroRequest request = registroRequestValido("Abc1#23");
+    @ParameterizedTest(name = "CP-REG-{0}: contrasena de {1} caracteres debe ser {2}")
+    @CsvSource({
+        "07,7,invalida,Abc1#23",
+        "08,8,valida,Abc123#@",
+        "09,9,valida,Abc1234#@",
+        "10,15,valida,Abc1234567890#@",
+        "11,16,valida,Abc12345678901#@",
+        "12,17,invalida,Abc123456789012#@"
+    })
+    void contrasenaLongitud_deberiaSerValidaOInvalida(String caseId, int length, String expectedOutcome, String contrasena) {
+        RegistroRequest request = registroRequestValido(contrasena);
 
-        assertTieneViolacionEnCampo(validator.validate(request), "contrasena");
-    }
-
-    @Test
-    @DisplayName("CP-REG-08: contrasena de 8 caracteres debe ser valida")
-    void contrasenaDeOchoCaracteres_deberiaSerValida() {
-        RegistroRequest request = registroRequestValido("Abc123#@");
-
-        assertSinViolacionEnCampo(validator.validate(request), "contrasena");
-    }
-
-    @Test
-    @DisplayName("CP-REG-09: contrasena de 9 caracteres debe ser valida")
-    void contrasenaDeNueveCaracteres_deberiaSerValida() {
-        RegistroRequest request = registroRequestValido("Abc1234#@");
-
-        assertSinViolacionEnCampo(validator.validate(request), "contrasena");
-    }
-
-    @Test
-    @DisplayName("CP-REG-10: contrasena de 15 caracteres debe ser valida")
-    void contrasenaDeQuinceCaracteres_deberiaSerValida() {
-        RegistroRequest request = registroRequestValido("Abc1234567890#@");
-
-        assertSinViolacionEnCampo(validator.validate(request), "contrasena");
-    }
-
-    @Test
-    @DisplayName("CP-REG-11: contrasena de 16 caracteres debe ser valida")
-    void contrasenaDeDieciseisCaracteres_deberiaSerValida() {
-        RegistroRequest request = registroRequestValido("Abc12345678901#@");
-
-        assertSinViolacionEnCampo(validator.validate(request), "contrasena");
-    }
-
-    @Test
-    @DisplayName("CP-REG-12: contrasena de 17 caracteres debe ser invalida")
-    void contrasenaDeDiecisieteCaracteres_deberiaSerInvalida() {
-        RegistroRequest request = registroRequestValido("Abc123456789012#@");
-
-        assertTieneViolacionEnCampo(validator.validate(request), "contrasena");
+        if ("invalida".equals(expectedOutcome)) {
+            assertTieneViolacionEnCampo(validator.validate(request), "contrasena");
+        } else {
+            assertSinViolacionEnCampo(validator.validate(request), "contrasena");
+        }
     }
 
     @Test
