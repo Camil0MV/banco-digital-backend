@@ -1,5 +1,6 @@
 package co.edu.udea.bancodigital.services;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -16,10 +17,16 @@ import co.edu.udea.bancodigital.dtos.responses.ListarClientesAdminResponse;
 import co.edu.udea.bancodigital.dtos.responses.RegistroResponse;
 import co.edu.udea.bancodigital.exception.DuplicateResourceException;
 import co.edu.udea.bancodigital.exception.EntityNotFoundException;
+import co.edu.udea.bancodigital.models.entities.Cuenta;
 import co.edu.udea.bancodigital.models.entities.Usuario;
+import co.edu.udea.bancodigital.models.entities.catalogs.EstadoCuenta;
 import co.edu.udea.bancodigital.models.entities.catalogs.Rol;
+import co.edu.udea.bancodigital.models.entities.catalogs.TipoCuenta;
 import co.edu.udea.bancodigital.models.entities.catalogs.TipoDocumento;
 import co.edu.udea.bancodigital.models.pks.UsuarioId;
+import co.edu.udea.bancodigital.repositories.CuentaRepository;
+import co.edu.udea.bancodigital.repositories.EstadoCuentaRepository;
+import co.edu.udea.bancodigital.repositories.TipoCuentaRepository;
 import co.edu.udea.bancodigital.repositories.UsuarioRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -29,11 +36,17 @@ import lombok.RequiredArgsConstructor;
 public class UsuarioService {
 
     private static final String ROL_CLIENTE = "CLIENTE";
+    private static final String ESTADO_ACTIVA = "ACTIVA";
+    private static final int TIPO_CUENTA_DEFAULT_ID = 1;
 
     private final UsuarioRepository usuarioRepository;
+    private final CuentaRepository cuentaRepository;
+    private final TipoCuentaRepository tipoCuentaRepository;
+    private final EstadoCuentaRepository estadoCuentaRepository;
     private final PasswordEncoder passwordEncoder;
     private final EntityManager entityManager;
 
+    @Transactional
     public RegistroResponse registrar(RegistroRequest request) {
         String correo = request.getCorreo().trim().toLowerCase();
         if (usuarioRepository.existsByCorreo(correo)) {
@@ -68,7 +81,8 @@ public class UsuarioService {
                 .rol(rolCliente)
                 .build();
 
-        usuarioRepository.save(usuario);
+        Usuario guardado = usuarioRepository.save(usuario);
+        crearCuentaInicial(guardado);
 
         return RegistroResponse.builder()
             .idTipoDoc(tipoDocumento.getId())
@@ -170,5 +184,21 @@ public class UsuarioService {
                 .findFirst()
                 .orElseThrow(() -> new DataIntegrityViolationException(
                         "No existe el rol CLIENTE en la tabla roles"));
+    }
+
+    private void crearCuentaInicial(Usuario usuario) {
+        TipoCuenta tipoCuenta = tipoCuentaRepository.findById(TIPO_CUENTA_DEFAULT_ID)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "No existe tipo_cuenta con id: " + TIPO_CUENTA_DEFAULT_ID));
+        EstadoCuenta estadoActiva = estadoCuentaRepository.findByNombreIgnoreCase(ESTADO_ACTIVA)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "No existe el estado ACTIVA en la tabla estados_cuenta"));
+
+        cuentaRepository.save(Cuenta.builder()
+                .dueno(usuario)
+                .tipoCuenta(tipoCuenta)
+                .estadoCuenta(estadoActiva)
+                .saldo(BigDecimal.ZERO)
+                .build());
     }
 }
