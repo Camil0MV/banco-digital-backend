@@ -48,13 +48,16 @@ public class UsuarioService {
 
     @Transactional
     public RegistroResponse registrar(RegistroRequest request) {
-        String correo = request.getCorreo().trim().toLowerCase();
+        String correo = normalizeEmail(request.getCorreo());
+
         if (usuarioRepository.existsByCorreo(correo)) {
             throw new DuplicateResourceException("Ya existe un usuario con el correo: " + correo);
         }
 
         Integer idTipoDoc = request.getIdTipoDoc();
+
         String numeroDocumento = request.getNumeroDocumento().trim();
+        
         UsuarioId id = new UsuarioId(idTipoDoc, numeroDocumento);
 
         if (usuarioRepository.existsById(id)) {
@@ -200,5 +203,9 @@ public class UsuarioService {
                 .estadoCuenta(estadoActiva)
                 .saldo(BigDecimal.ZERO)
                 .build());
+    }
+
+    private String normalizeEmail(String correo) {
+        return correo.trim().toLowerCase();
     }
 }
