@@ -41,86 +41,38 @@ public class CuentaService {
 
     @Transactional
     public CrearCuentaResponse crearCuenta(CrearCuentaRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String correo = authentication.getName();
-        
-        Usuario usuario = usuarioRepository.findByCorreo(correo)
-                .orElseThrow(() -> new EntityNotFoundException("Usuario autenticado no encontrado"));
+        Usuario usuario = getAuthenticatedUsuario();
+        TipoCuenta tipoCuenta = getTipoCuenta(request.getIdTipoCuenta());
+        EstadoCuenta estadoActiva = getEstadoActiva();
 
-        TipoCuenta tipoCuenta = tipoCuentaRepository.findById(request.getIdTipoCuenta())
-                .orElseThrow(() -> new EntityNotFoundException("No existe tipo_cuenta con id: " + request.getIdTipoCuenta()));
-
-        EstadoCuenta estadoActiva = estadoCuentaRepository.findByNombreIgnoreCase(ESTADO_ACTIVA)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "No existe el estado ACTIVA en la tabla estados_cuenta"));
-
-        Cuenta cuenta = Cuenta.builder()
-                .dueno(usuario)
-                .tipoCuenta(tipoCuenta)
-                .estadoCuenta(estadoActiva)
-                .saldo(BigDecimal.ZERO)
-                .build();
-
-        Cuenta guardada = cuentaRepository.save(cuenta);
-
-        return CrearCuentaResponse.builder()
-                .idCuenta(guardada.getIdCuenta())
-                .idTipoCuenta(guardada.getTipoCuenta().getId())
-                .tipoCuenta(guardada.getTipoCuenta().getNombre())
-                .idEstadoCuenta(guardada.getEstadoCuenta().getId())
-                .estadoCuenta(guardada.getEstadoCuenta().getNombre())
-                .saldo(guardada.getSaldo())
-                .createdAt(guardada.getCreatedAt())
-                .build();
+        Cuenta guardada = cuentaRepository.save(toCuenta(usuario, tipoCuenta, estadoActiva));
+        return toCrearCuentaResponse(guardada);
     }
 
     @Transactional(readOnly = true)
     public ConsultarCuentasResponse consultarMisCuentas() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String correo = authentication.getName();
-
+        String correo = getAuthenticatedCorreo();
         List<Cuenta> cuentas = cuentaRepository.findAllByDuenoCorreo(correo);
+
         if (cuentas.isEmpty()) {
             throw new EntityNotFoundException("Cuenta no disponible");
         }
 
-        List<DetalleCuenta> detalles = cuentas.stream()
-                .map(c -> DetalleCuenta.builder()
-                        .idCuenta(c.getIdCuenta())
-                        .idTipoCuenta(c.getTipoCuenta().getId())
-                        .tipoCuenta(c.getTipoCuenta().getNombre())
-                        .idEstadoCuenta(c.getEstadoCuenta().getId())
-                        .estadoCuenta(c.getEstadoCuenta().getNombre())
-                        .saldo(c.getSaldo())
-                        .createdAt(c.getCreatedAt())
-                        .build())
-                .toList();
-
         return ConsultarCuentasResponse.builder()
                 .totalCuentas(cuentas.size())
-                .cuentas(detalles)
+                .cuentas(cuentas.stream()
+                        .map(this::toDetalleCuenta)
+                        .toList())
                 .build();
     }
 
     @Transactional(readOnly = true)
     public ConsultarSaldoResponse consultarSaldoCuenta(UUID idCuenta) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String correo = authentication.getName();
+        Usuario usuario = getAuthenticatedUsuario();
+        Cuenta cuenta = findCuentaOrThrow(idCuenta);
 
-        Usuario usuario = usuarioRepository.findByCorreo(correo)
-                .orElseThrow(() -> new EntityNotFoundException("Usuario autenticado no encontrado"));
+        verifyOwnership(cuenta, usuario);
 
-        // Buscar solo por ID primero → 404 si no existe
-        Cuenta cuenta = cuentaRepository.findByIdCuentaConDueno(idCuenta)
-            .orElseThrow(() -> new EntityNotFoundException(
-                "Cuenta con id " + idCuenta + " no existe"));
-
-        // Verificar propiedad → 403 si no es el dueño
-        if (!cuenta.getDueno().equals(usuario)) {
-            throw new AccessDeniedException(
-                "No tiene permisos para acceder a esta cuenta");
-        }
-        
         return ConsultarSaldoResponse.builder()
                 .idCuenta(cuenta.getIdCuenta())
                 .saldo(cuenta.getSaldo())
@@ -132,24 +84,94 @@ public class CuentaService {
     @Transactional(readOnly = true)
     public List<ListarCuentasAdminResponse> listarCuentasAdmin() {
         return cuentaRepository.findAll().stream()
-                .map(cuenta -> ListarCuentasAdminResponse.builder()
-                        .idCuenta(cuenta.getIdCuenta())
-                        .tipoDocumentoDueno(cuenta.getDueno().getTipoDocumento().getNombre())
-                        .numeroDocumentoDueno(cuenta.getDueno().getId().getNumeroDocumento())
-                        .nombreCompletoDueno(buildNombreCompletoDueno(cuenta.getDueno()))
-                        .tipoCuenta(cuenta.getTipoCuenta().getNombre())
-                        .estadoCuenta(cuenta.getEstadoCuenta().getNombre())
-                        .saldo(cuenta.getSaldo())
-                        .createdAt(cuenta.getCreatedAt())
-                        .build())
+                .map(this::toListarCuentasAdminResponse)
                 .toList();
     }
-    
+
+    private String getAuthenticatedCorreo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
+    }
+
+    private Usuario getAuthenticatedUsuario() {
+        return usuarioRepository.findByCorreo(getAuthenticatedCorreo())
+                .orElseThrow(() -> new EntityNotFoundException("Usuario autenticado no encontrado"));
+    }
+
+    private TipoCuenta getTipoCuenta(Integer idTipoCuenta) {
+        return tipoCuentaRepository.findById(idTipoCuenta)
+                .orElseThrow(() -> new EntityNotFoundException("No existe tipo_cuenta con id: " + idTipoCuenta));
+    }
+
+    private EstadoCuenta getEstadoActiva() {
+        return estadoCuentaRepository.findByNombreIgnoreCase(ESTADO_ACTIVA)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "No existe el estado ACTIVA en la tabla estados_cuenta"));
+    }
+
+    private Cuenta toCuenta(Usuario usuario, TipoCuenta tipoCuenta, EstadoCuenta estadoActiva) {
+        return Cuenta.builder()
+                .dueno(usuario)
+                .tipoCuenta(tipoCuenta)
+                .estadoCuenta(estadoActiva)
+                .saldo(BigDecimal.ZERO)
+                .build();
+    }
+
+    private CrearCuentaResponse toCrearCuentaResponse(Cuenta cuenta) {
+        return CrearCuentaResponse.builder()
+                .idCuenta(cuenta.getIdCuenta())
+                .idTipoCuenta(cuenta.getTipoCuenta().getId())
+                .tipoCuenta(cuenta.getTipoCuenta().getNombre())
+                .idEstadoCuenta(cuenta.getEstadoCuenta().getId())
+                .estadoCuenta(cuenta.getEstadoCuenta().getNombre())
+                .saldo(cuenta.getSaldo())
+                .createdAt(cuenta.getCreatedAt())
+                .build();
+    }
+
+    private DetalleCuenta toDetalleCuenta(Cuenta cuenta) {
+        return DetalleCuenta.builder()
+                .idCuenta(cuenta.getIdCuenta())
+                .idTipoCuenta(cuenta.getTipoCuenta().getId())
+                .tipoCuenta(cuenta.getTipoCuenta().getNombre())
+                .idEstadoCuenta(cuenta.getEstadoCuenta().getId())
+                .estadoCuenta(cuenta.getEstadoCuenta().getNombre())
+                .saldo(cuenta.getSaldo())
+                .createdAt(cuenta.getCreatedAt())
+                .build();
+    }
+
+    private Cuenta findCuentaOrThrow(UUID idCuenta) {
+        return cuentaRepository.findByIdCuentaConDueno(idCuenta)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Cuenta con id " + idCuenta + " no existe"));
+    }
+
+    private void verifyOwnership(Cuenta cuenta, Usuario usuario) {
+        if (!cuenta.getDueno().equals(usuario)) {
+            throw new AccessDeniedException("No tiene permisos para acceder a esta cuenta");
+        }
+    }
+
+    private ListarCuentasAdminResponse toListarCuentasAdminResponse(Cuenta cuenta) {
+        return ListarCuentasAdminResponse.builder()
+                .idCuenta(cuenta.getIdCuenta())
+                .tipoDocumentoDueno(cuenta.getDueno().getTipoDocumento().getNombre())
+                .numeroDocumentoDueno(cuenta.getDueno().getId().getNumeroDocumento())
+                .nombreCompletoDueno(buildNombreCompletoDueno(cuenta.getDueno()))
+                .tipoCuenta(cuenta.getTipoCuenta().getNombre())
+                .estadoCuenta(cuenta.getEstadoCuenta().getNombre())
+                .saldo(cuenta.getSaldo())
+                .createdAt(cuenta.getCreatedAt())
+                .build();
+    }
+
     private String buildNombreCompletoDueno(Usuario dueno) {
         String segundoApellido = dueno.getSegundoApellido();
-                if (segundoApellido == null || segundoApellido.isBlank()) {
-                        return dueno.getNombre() + " " + dueno.getPrimerApellido();
-                }
-                return dueno.getNombre() + " " + dueno.getPrimerApellido() + " " + segundoApellido;
+        if (segundoApellido == null || segundoApellido.isBlank()) {
+            return dueno.getNombre() + " " + dueno.getPrimerApellido();
+        }
+        return dueno.getNombre() + " " + dueno.getPrimerApellido() + " " + segundoApellido;
     }
 }
