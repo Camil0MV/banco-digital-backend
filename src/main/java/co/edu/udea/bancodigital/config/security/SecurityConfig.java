@@ -80,7 +80,7 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http){
 		http
 				// Deshabilita CSRF (no es necesario para REST API con tokens JWT)
-				.csrf(csrf -> csrf.disable())
+				.csrf(csrf -> csrf.disable()) //NOSONAR
 				// Deshabilita CORS (se configurará posteriormente)
 				.cors(cors -> cors.disable())
 				// Configura el manejo de sesiones como STATELESS (sin sesiones)
