@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import co.edu.udea.bancodigital.dtos.responses.DetalleTransaccionResponse;
 import co.edu.udea.bancodigital.dtos.responses.HistorialTransaccionResponse;
 import co.edu.udea.bancodigital.dtos.responses.HistorialTransaccionesResponse;
+import co.edu.udea.bancodigital.dtos.responses.AuditoriaTransaccionResponse;
+import co.edu.udea.bancodigital.dtos.responses.AuditoriaTransaccionesResponse;
 import co.edu.udea.bancodigital.exception.EntityNotFoundException;
 import co.edu.udea.bancodigital.models.entities.Cuenta;
 import co.edu.udea.bancodigital.models.entities.Transaccion;
@@ -84,6 +86,13 @@ public class TransaccionService {
         return toDetalleResponse(transaccion);
     }
 
+    @Transactional(readOnly = true)
+    public AuditoriaTransaccionesResponse consultarHistorialAuditoria(Pageable pageable) {
+        var pagina = transaccionRepository.findAllForAuditoria(pageable)
+                .map(this::toAuditoriaResponse);
+        return construirRespuestaAuditoria(pagina);
+    }
+
     private Usuario obtenerUsuarioAutenticado() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String correo = authentication.getName();
@@ -107,6 +116,49 @@ public class TransaccionService {
                 .cuentaOrigen(transaccion.getCuentaOrigen().getIdCuenta())
                 .cuentaDestino(transaccion.getCuentaDestino().getIdCuenta())
                 .estado(transaccion.getEstado().getNombre())
+                .build();
+    }
+
+    private AuditoriaTransaccionResponse toAuditoriaResponse(Transaccion transaccion) {
+        return AuditoriaTransaccionResponse.builder()
+                .idTransaccion(transaccion.getIdTransaccion())
+                .cliente(obtenerClienteAsociado(transaccion))
+                .cuentaOrigen(transaccion.getCuentaOrigen().getIdCuenta())
+                .cuentaDestino(transaccion.getCuentaDestino().getIdCuenta())
+                .fechaHora(transaccion.getFechaHora())
+                .monto(transaccion.getMonto())
+                .estado(transaccion.getEstado().getNombre())
+                .descripcion(transaccion.getDescripcion())
+                .tipoTransaccion(transaccion.getTipo().getNombre())
+                .build();
+    }
+
+    private String obtenerClienteAsociado(Transaccion transaccion) {
+        Usuario cliente = transaccion.getCuentaOrigen().getDueno();
+        String segundoApellido = cliente.getSegundoApellido() != null ? " " + cliente.getSegundoApellido() : "";
+        return String.format("%s %s%s", cliente.getNombre(), cliente.getPrimerApellido(), segundoApellido);
+    }
+
+    private AuditoriaTransaccionesResponse construirRespuestaAuditoria(org.springframework.data.domain.Page<AuditoriaTransaccionResponse> pagina) {
+        String mensaje;
+        boolean tieneDatos;
+
+        if (pagina.isEmpty()) {
+            mensaje = "No existen transacciones registradas";
+            tieneDatos = false;
+        } else {
+            mensaje = null;
+            tieneDatos = true;
+        }
+
+        return AuditoriaTransaccionesResponse.builder()
+                .transacciones(pagina.getContent())
+                .total(pagina.getTotalElements())
+                .pagina(pagina.getNumber())
+                .tamanoPagina(pagina.getSize())
+                .totalPaginas(pagina.getTotalPages())
+                .mensaje(mensaje)
+                .tieneDatos(tieneDatos)
                 .build();
     }
 
