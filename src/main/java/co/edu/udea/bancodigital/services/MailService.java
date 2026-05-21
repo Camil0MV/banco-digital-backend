@@ -8,6 +8,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.core.io.ByteArrayResource;
 
 @Service
 @RequiredArgsConstructor
@@ -141,5 +142,30 @@ public class MailService {
                 </html>
                 """, alertMessage);
         sendHtmlEmail(to, subject, htmlContent);
+    }
+
+    /**
+     * Send email with attachments
+     */
+    public void sendEmailWithAttachments(String to, String subject, String htmlContent,
+                                        java.util.Map<String, byte[]> attachments) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(FROM_EMAIL);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+
+            for (java.util.Map.Entry<String, byte[]> attachment : attachments.entrySet()) {
+                helper.addAttachment(attachment.getKey(), new ByteArrayResource(attachment.getValue()));
+            }
+
+            mailSender.send(message);
+            log.info("Email with {} attachment(s) sent successfully to: {}", attachments.size(), to);
+        } catch (MessagingException e) {
+            log.error("Error sending email with attachments to {}: {}", to, e.getMessage());
+            throw new RuntimeException("Error sending email with attachments", e);
+        }
     }
 }
