@@ -200,6 +200,26 @@ public class GlobalExceptionHandler {
 	 * Maneja cualquier otra excepción no capturada.
 	 * Responde con HTTP 500 Internal Server Error.
 	 */
+	@ExceptionHandler(ReporteGenerationException.class)
+	public ResponseEntity<ApiError> handleReporteGenerationException(ReporteGenerationException ex, WebRequest request) {
+		String traceId = UUID.randomUUID().toString();
+		log.error("ReporteGenerationException [traceId: {}] - {}", traceId, ex.getMessage(), ex);
+
+		ApiError apiError = ApiError.builder()
+				.errorCode("REPORT_GENERATION_ERROR")
+				.message("No fue posible generar el certificado")
+				.details(ex.getMessage())
+				.traceId(traceId)
+				.timestamp(LocalDateTime.now())
+				.build();
+
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiError);
+	}
+
+	/**
+	 * Maneja cualquier otra excepción no capturada.
+	 * Responde con HTTP 500 Internal Server Error.
+	 */
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiError> handleGenericException(Exception ex, WebRequest request) {
 		String traceId = UUID.randomUUID().toString();
