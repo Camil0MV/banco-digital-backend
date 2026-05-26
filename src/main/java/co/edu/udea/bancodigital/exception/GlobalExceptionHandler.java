@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -105,6 +106,26 @@ public class GlobalExceptionHandler {
 	}
 
 	/**
+	 * Maneja la excepción AuthenticationException.
+	 * Responde con HTTP 401 Unauthorized.
+	 */
+	@ExceptionHandler(AuthenticationException.class)
+	public ResponseEntity<ApiError> handleAuthenticationException(AuthenticationException ex, WebRequest request) {
+		String traceId = UUID.randomUUID().toString();
+		log.warn("AuthenticationException [traceId: {}] - {}", traceId, ex.getMessage(), ex);
+
+		ApiError apiError = ApiError.builder()
+				.errorCode("UNAUTHORIZED")
+				.message("No autenticado")
+				.details("Debe iniciar sesion para acceder a este recurso")
+				.traceId(traceId)
+				.timestamp(LocalDateTime.now())
+				.build();
+
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(apiError);
+	}
+
+	/**
 	 * Maneja la excepción MethodArgumentNotValidException.
 	 * Responde con HTTP 400 Bad Request y extrae errores de validación.
 	 */
@@ -173,6 +194,26 @@ public class GlobalExceptionHandler {
 				.build();
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+	}
+
+	/**
+	 * Maneja cualquier otra excepción no capturada.
+	 * Responde con HTTP 500 Internal Server Error.
+	 */
+	@ExceptionHandler(ReporteGenerationException.class)
+	public ResponseEntity<ApiError> handleReporteGenerationException(ReporteGenerationException ex, WebRequest request) {
+		String traceId = UUID.randomUUID().toString();
+		log.error("ReporteGenerationException [traceId: {}] - {}", traceId, ex.getMessage(), ex);
+
+		ApiError apiError = ApiError.builder()
+				.errorCode("REPORT_GENERATION_ERROR")
+				.message("No fue posible generar el certificado")
+				.details(ex.getMessage())
+				.traceId(traceId)
+				.timestamp(LocalDateTime.now())
+				.build();
+
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiError);
 	}
 
 	/**
