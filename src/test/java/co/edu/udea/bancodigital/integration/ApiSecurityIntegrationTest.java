@@ -7,7 +7,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
@@ -239,11 +238,12 @@ class ApiSecurityIntegrationTest {
     }
 
     @Test
-    @DisplayName("Integracion CP-ADMC-04: usuario sin autenticacion es redirigido al login")
-    void listarClientesSinAutenticacion_deberiaRedirigirALogin() throws Exception {
-        mockMvc.perform(get("/api/v1/admin/clientes").accept(MediaType.TEXT_HTML))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+    @DisplayName("Integracion CP-ADMC-04: usuario sin autenticacion retorna 401")
+    void listarClientesSinAutenticacion_deberiaRetornarUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/clientes").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("No autenticado"));
     }
 
     @Test
@@ -297,11 +297,12 @@ class ApiSecurityIntegrationTest {
     }
 
     @Test
-    @DisplayName("Integracion CP-ACC-02: usuario sin autenticacion es redirigido al login")
-    void consultarMisCuentasSinAutenticacion_deberiaRedirigirALogin() throws Exception {
-        mockMvc.perform(get("/api/v1/cuentas/me").accept(MediaType.TEXT_HTML))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+    @DisplayName("Integracion CP-ACC-02: usuario sin autenticacion retorna 401")
+    void consultarMisCuentasSinAutenticacion_deberiaRetornarUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/v1/cuentas/me").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("No autenticado"));
     }
 
     @Test
@@ -323,10 +324,11 @@ class ApiSecurityIntegrationTest {
     }
 
     @Test
-    @DisplayName("Integracion CP-CSD-03: usuario sin autenticacion es redirigido al login")
-    void consultarSaldoSinAutenticacion_deberiaRedirigirALogin() throws Exception {
-        mockMvc.perform(get("/api/v1/cuentas/{idCuenta}/saldo", UUID.randomUUID()).accept(MediaType.TEXT_HTML))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+    @DisplayName("Integracion CP-CSD-03: usuario sin autenticacion retorna 401")
+    void consultarSaldoSinAutenticacion_deberiaRetornarUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/v1/cuentas/{idCuenta}/saldo", UUID.randomUUID()).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("No autenticado"));
     }
 }
