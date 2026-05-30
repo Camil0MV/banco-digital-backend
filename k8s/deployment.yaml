@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: bancodigital
-          image: bancodigital:latest
+          image: bancodigital:v2
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -61,6 +61,8 @@ spec:
                 secretKeyRef:
                   name: bancodigital-secrets
                   key: SPRING_MAIL_PASSWORD
+            - name: MANAGEMENT_METRICS_TAGS_APPLICATION
+              value: "bancodigital"
           readinessProbe:
             httpGet:
               path: /actuator/health
