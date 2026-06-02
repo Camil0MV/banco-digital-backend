@@ -17,15 +17,16 @@ Este repositorio ya incluye:
 
 ## Stack Tecnico
 
-- Java 25
-- Spring Boot 4.0.4
-- Spring Web, Spring Data JPA, Spring Security
+- Java 21
+- Spring Boot 3.4.4
+- Spring Web, Spring Data JPA, Spring Security, Spring HATEOAS
 - JWT (jjwt)
-- PostgreSQL
+- PostgreSQL (Neon)
 - Flyway
 - Springdoc OpenAPI (Swagger UI)
 - Actuator + Prometheus
 - Maven Wrapper
+- Arquitectura en capas
 
 ## Estructura Principal
 
@@ -67,6 +68,13 @@ Notas:
 - La conexion a BD esta definida en `application.properties` para entorno de desarrollo.
 - Para despliegue real, se recomienda sobreescribir credenciales por variables de entorno (`SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`).
 
+## Variables de entorno requeridas
+
+- `SPRING_DATASOURCE_URL`
+- `DATASOURCE_USERNAME`
+- `DATASOURCE_PASSWORD`
+- `APP_JWT_SECRET`
+
 ## Ejecutar Proyecto
 
 ### Windows (PowerShell)
@@ -88,6 +96,11 @@ La API queda disponible en:
 - Base URL: `http://localhost:8080`
 - Swagger UI: `http://localhost:8080/swagger`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+Produccion:
+
+- Base URL: `https://banco-digital-backend-u3ts.onrender.com`
+- Swagger UI: `https://banco-digital-backend-u3ts.onrender.com/swagger-ui.html`
 
 ## Migraciones con Flyway
 
@@ -122,6 +135,38 @@ Para endpoints protegidos usar header:
 ```http
 Authorization: Bearer <token>
 ```
+
+## Endpoints disponibles
+
+| Metodo | Ruta | Acceso | Descripcion |
+|--------|------|--------|-------------|
+| POST | /api/v1/auth/login | Publico | Iniciar sesion, retorna JWT Bearer |
+| POST | /api/v1/usuarios/registro | Publico | Registrar nuevo cliente |
+| PUT | /api/v1/usuarios/me | CLIENTE | Actualizar datos personales |
+| POST | /api/v1/cuentas | CLIENTE | Crear cuenta bancaria |
+| GET | /api/v1/cuentas/me | CLIENTE | Listar mis cuentas |
+| GET | /api/v1/cuentas/{idCuenta}/saldo | CLIENTE | Consultar saldo de una cuenta |
+| GET | /api/v1/admin/clientes | ADMIN | Listar todos los clientes |
+| GET | /api/v1/admin/cuentas | ADMIN | Listar todas las cuentas del sistema |
+
+Los endpoints protegidos requieren header: Authorization: Bearer <token>
+
+## Autenticacion
+
+El sistema usa JWT. El token se obtiene en `POST /api/v1/auth/login` y debe enviarse como Bearer token en el header `Authorization` de cada request protegido.
+
+## Base de datos
+
+- Motor: PostgreSQL en Neon (serverless)
+- Migraciones gestionadas con Flyway (V0 a V3 aplicadas)
+- Tablas: usuarios, cuentas, transacciones, roles, tipos_cuenta, estados_cuenta, tipos_documento, tipos_transaccion
+
+## CI/CD
+
+- Pipeline en GitHub Actions (.github/workflows/ci.yml)
+- Trigger: push y PR hacia develop y main
+- Ejecuta mvn verify con Java 21 Temurin
+- 8 tests automatizados
 
 ## Endpoints Implementados
 
