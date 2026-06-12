@@ -32,6 +32,7 @@ public class SecurityConfig {
 
 	private final JwtService jwtService;
 	private final UserDetailsService userDetailsService;
+	private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
 	/**
 	 * Bean para codificar contraseñas.
@@ -79,21 +80,23 @@ public class SecurityConfig {
 	*/
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http){
-		http
+			http
 				// Deshabilita CSRF (no es necesario para REST API con tokens JWT)
 				.csrf(csrf -> csrf.disable()) //NOSONAR
 				// Deshabilita CORS (se configurará posteriormente)
 				.cors(cors -> cors.disable())
 				// Configura el manejo de sesiones como STATELESS (sin sesiones)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.anonymous(anonym -> anonym.disable())
+				.exceptionHandling(exception -> exception
+						.authenticationEntryPoint(restAuthenticationEntryPoint))
 				// Configura las autorizaciones
 				.authorizeHttpRequests(authz -> authz
 						// Rutas públicas - no requieren autenticación
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/usuarios/registro").permitAll()
-						// Health checks para Render/Actuator
+						// Health checks y métricas para Actuator/Prometheus
 						.requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+						.requestMatchers("/actuator/prometheus").permitAll()
 						// Swagger UI
 						.requestMatchers("/swagger", "/swagger/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
 						.permitAll()

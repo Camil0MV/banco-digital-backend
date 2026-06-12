@@ -7,7 +7,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
@@ -35,9 +34,12 @@ import co.edu.udea.bancodigital.dtos.responses.ListarClientesAdminResponse;
 import co.edu.udea.bancodigital.dtos.responses.ListarCuentasAdminResponse;
 import co.edu.udea.bancodigital.dtos.responses.LoginResponse;
 import co.edu.udea.bancodigital.dtos.responses.RegistroResponse;
+import co.edu.udea.bancodigital.dtos.responses.AuditoriaTransaccionResponse;
+import co.edu.udea.bancodigital.dtos.responses.AuditoriaTransaccionesResponse;
 import co.edu.udea.bancodigital.services.AuthService;
 import co.edu.udea.bancodigital.services.CuentaService;
 import co.edu.udea.bancodigital.services.UsuarioService;
+import co.edu.udea.bancodigital.services.TransaccionService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -68,6 +70,9 @@ class ApiSecurityIntegrationTest {
 
     @MockitoBean
     private CuentaService cuentaService;
+
+        @MockitoBean
+        private TransaccionService transaccionService;
 
     @Test
     @DisplayName("Integracion CP-REG-01: registro publico retorna 201")
@@ -174,6 +179,55 @@ class ApiSecurityIntegrationTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("Integracion CP-ADM-10: admin autenticado puede auditar transacciones")
+    void listarTransaccionesAuditoriaComoAdmin_deberiaRetornarOk() throws Exception {
+        when(transaccionService.consultarHistorialAuditoria(any()))
+                .thenReturn(AuditoriaTransaccionesResponse.builder()
+                        .transacciones(List.of(AuditoriaTransaccionResponse.builder()
+                                .idTransaccion(UUID.randomUUID())
+                                .cliente("Juan Perez")
+                                .cuentaOrigen(UUID.randomUUID())
+                                .cuentaDestino(UUID.randomUUID())
+                                .fechaHora(LocalDateTime.now())
+                                .monto(new BigDecimal("1500.00"))
+                                .estado("COMPLETADA")
+                                .descripcion("Transferencia entre cuentas")
+                                .tipoTransaccion("TRANSFERENCIA")
+                                .build()))
+                        .total(1)
+                        .pagina(0)
+                        .tamanoPagina(20)
+                        .totalPaginas(1)
+                        .tieneDatos(true)
+                        .build());
+
+        mockMvc.perform(get("/api/v1/admin/transacciones"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.transacciones", hasSize(1)))
+                .andExpect(jsonPath("$.transacciones[0].cliente").value("Juan Perez"));
+    }
+
+    @Test
+    @DisplayName("Integracion CP-ADM-11: usuario sin autenticacion no puede auditar transacciones")
+    void listarTransaccionesAuditoriaSinAutenticacion_deberiaRetornarUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/transacciones").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("No autenticado"));
+    }
+
+    @Test
+    @WithMockUser(roles = "CLIENTE")
+    @DisplayName("Integracion CP-ADM-12: cliente autenticado no puede auditar transacciones")
+    void listarTransaccionesAuditoriaComoCliente_deberiaRetornarForbidden() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/transacciones"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"))
+                .andExpect(jsonPath("$.message").value("Acceso denegado"));
+    }
+
+    @Test
     @WithMockUser(roles = "CLIENTE")
     @DisplayName("Integracion CP-ADM-03: cliente no puede consultar admin")
     void listarClientesComoCliente_deberiaRetornarForbidden() throws Exception {
@@ -184,11 +238,12 @@ class ApiSecurityIntegrationTest {
     }
 
     @Test
-    @DisplayName("Integracion CP-ADMC-04: usuario sin autenticacion es redirigido al login")
-    void listarClientesSinAutenticacion_deberiaRedirigirALogin() throws Exception {
-        mockMvc.perform(get("/api/v1/admin/clientes").accept(MediaType.TEXT_HTML))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+    @DisplayName("Integracion CP-ADMC-04: usuario sin autenticacion retorna 401")
+    void listarClientesSinAutenticacion_deberiaRetornarUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/clientes").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("No autenticado"));
     }
 
     @Test
@@ -242,11 +297,12 @@ class ApiSecurityIntegrationTest {
     }
 
     @Test
-    @DisplayName("Integracion CP-ACC-02: usuario sin autenticacion es redirigido al login")
-    void consultarMisCuentasSinAutenticacion_deberiaRedirigirALogin() throws Exception {
-        mockMvc.perform(get("/api/v1/cuentas/me").accept(MediaType.TEXT_HTML))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+    @DisplayName("Integracion CP-ACC-02: usuario sin autenticacion retorna 401")
+    void consultarMisCuentasSinAutenticacion_deberiaRetornarUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/v1/cuentas/me").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("No autenticado"));
     }
 
     @Test
@@ -268,10 +324,11 @@ class ApiSecurityIntegrationTest {
     }
 
     @Test
-    @DisplayName("Integracion CP-CSD-03: usuario sin autenticacion es redirigido al login")
-    void consultarSaldoSinAutenticacion_deberiaRedirigirALogin() throws Exception {
-        mockMvc.perform(get("/api/v1/cuentas/{idCuenta}/saldo", UUID.randomUUID()).accept(MediaType.TEXT_HTML))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+    @DisplayName("Integracion CP-CSD-03: usuario sin autenticacion retorna 401")
+    void consultarSaldoSinAutenticacion_deberiaRetornarUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/v1/cuentas/{idCuenta}/saldo", UUID.randomUUID()).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("No autenticado"));
     }
 }

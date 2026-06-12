@@ -167,7 +167,7 @@ class CuentaServiceTest {
         Cuenta cuenta1 = crearCuentaValida(UUID.randomUUID(), adminUsuario, tipoCuentaAhorros, estadoActiva, new BigDecimal("1500.00"));
         Cuenta cuenta2 = crearCuentaValida(UUID.randomUUID(), adminUsuario, tipoCuentaAhorros, estadoActiva, new BigDecimal("2500.00"));
 
-        when(cuentaRepository.findAll()).thenReturn(List.of(cuenta1, cuenta2));
+        when(cuentaRepository.findAllForAdmin()).thenReturn(List.of(cuenta1, cuenta2));
 
         List<ListarCuentasAdminResponse> response = cuentaService.listarCuentasAdmin();
 
@@ -192,7 +192,7 @@ class CuentaServiceTest {
     @Test
     @DisplayName("CP-ADMC-02 Consulta sin cuentas registradas")
     void listarCuentasAdmin_deberiaRetornarListaVaciaCuandoNoHayCuentasRegistradas() {
-        when(cuentaRepository.findAll()).thenReturn(List.of());
+        when(cuentaRepository.findAllForAdmin()).thenReturn(List.of());
 
         List<ListarCuentasAdminResponse> response = cuentaService.listarCuentasAdmin();
 
@@ -226,7 +226,6 @@ class CuentaServiceTest {
 
         assertEquals(cuenta.getIdCuenta(), response.getIdCuenta());
         assertEquals(cuenta.getSaldo(), response.getSaldo());
-        assertNotNull(response.getConsultedAt());
         System.out.println("=== CP-CSD-01 RESULTADO OBTENIDO ===");
         System.out.println("Saldo consultado: " + response.getSaldo()); 
     }

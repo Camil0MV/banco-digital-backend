@@ -9,6 +9,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,12 +25,14 @@ import co.edu.udea.bancodigital.services.CuentaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/cuentas")
 @RequiredArgsConstructor
+@Tag(name = "Cuentas Bancarias", description = "Endpoints para gestión de cuentas bancarias")
 public class CuentaController {
 
     private final CuentaService cuentaService;
@@ -46,6 +49,7 @@ public class CuentaController {
     }
 
     @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Consultar las cuentas del usuario autenticado", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "Lista de cuentas del usuario autenticado")
     @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
@@ -58,6 +62,7 @@ public class CuentaController {
     }
 
     @GetMapping("/{idCuenta}/saldo")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Consultar el saldo disponible de una cuenta", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "Saldo consultado exitosamente")
     @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
